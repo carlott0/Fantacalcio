@@ -1,6 +1,14 @@
 # Fantacalcio
 Assistente guida per l'asta iniziale del fantacalcio 
 
+Requirements:
+
+Python3
+
+Install requirements:
+
+pip3 install -r requirements.txt
+
 Per far sì che l'applicazione funzioni, è necessario avere a disposizione gli excel nella cartella "excel". Ovvero: "calendario.xlsx", "classifica.xlsx", "giocatori.xlsx, "Quotazioni_Fantacalcio.xlsx".
 
 In pratica per funzionare bisogna sapere il calendario, la classifica dell'anno precedente, i giocatori con le rispettive quotazioni. Tutti questi dati solitamente sono ottenibili online a inizio campionato.
