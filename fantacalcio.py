@@ -365,6 +365,7 @@ def difensori(u,budget):
     new_acquisti=[]
     valore_prima=0
     valori=[]
+    giachiamati=[]
     valore_reparto=0
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     x=pd.read_excel("./excel/giocatori.xlsx")
@@ -386,12 +387,8 @@ def difensori(u,budget):
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
-        giocatore=input("Difensore ")
-        if giocatore in reparto_finale.keys():
-            print("Giocatore già acquistato.")
-            input("Premere Invio per continuare ")
-            continue
-            
+        
+        giocatore=input("Difensore ").upper()
         trovato=0
         for g in quotazioni['Nome']:
             if giocatore.upper()==g.upper():
@@ -409,6 +406,12 @@ def difensori(u,budget):
                 continue
             else:
                 giocatore=gx
+                
+        
+        if giocatore in reparto_finale.keys() or giocatore in giachiamati:
+            print("Giocatore già acquistato.")
+            input("Premere Invio per continuare ")
+            continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
@@ -474,6 +477,7 @@ def difensori(u,budget):
             q=int(input("A quanto è andato? "))
             x1.append(prezzo)
             y1.append(q)        
+            giachiamati.append(giocatore)
             print("", end="\r")
             acquistati=[]
             continue        
@@ -619,6 +623,7 @@ def centrocampisti(u,budget):
     valore_prima=0
     valori=[]
     valore_reparto=0
+    giachiamati=[]
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
@@ -639,12 +644,8 @@ def centrocampisti(u,budget):
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
-        giocatore=input("Centrocampista ")
-        if giocatore in reparto_finale.keys():
-            print("Giocatore già acquistato.")
-            input("Premere Invio per continuare ")
-            acquistati=[]
-            continue
+        giocatore=input("Centrocampista ").upper()
+
         trovato=0
         for g in quotazioni['Nome']:
             if giocatore.upper()==g.upper():
@@ -662,6 +663,11 @@ def centrocampisti(u,budget):
                 continue
             else:
                 giocatore=gx
+        if giocatore in reparto_finale.keys() or giocatore in giachiamati:
+            print("Giocatore già acquistato.")
+            input("Premere Invio per continuare ")
+            acquistati=[]
+            continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
@@ -725,6 +731,7 @@ def centrocampisti(u,budget):
             q=int(input("A quanto è andato? "))
             x1.append(prezzo)
             y1.append(q)        
+            giachiamati.append(giocatore)
             print("", end="\r")
             acquistati=[]
             continue        
@@ -872,6 +879,7 @@ def attaccanti(u,budget):
     new_acquisti=[]
     valore_prima=0
     valori=[]
+    giachiamati=[]
     valore_reparto=0
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
@@ -893,8 +901,8 @@ def attaccanti(u,budget):
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
-        giocatore=input("Attaccante ")
-        if giocatore in reparto_finale.keys():
+        giocatore=input("Attaccante ").upper()
+        if giocatore.upper() in reparto_finale.keys() or giocatore.upper() in giachiamati:
             print("Giocatore già acquistato.")
             input("Premere Invio per continuare ")
             acquistati=[]
@@ -917,6 +925,11 @@ def attaccanti(u,budget):
                 continue
             else:
                 giocatore=gx
+        if giocatore in reparto_finale.keys() or giocatore in giachiamati:
+            print("Giocatore già acquistato.")
+            input("Premere Invio per continuare ")
+            acquistati=[]
+            continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
@@ -982,6 +995,7 @@ def attaccanti(u,budget):
             y1.append(q)
             print("", end="\r")
             acquistati=[]
+            giachiamati.append(giocatore.upper())
             continue        
         try:
             if int(quanto)>0:
