@@ -12,8 +12,35 @@ import urllib.request
 from requests_html import HTMLSession
 import os, errno
 from tabulate import tabulate
+from termcolor import colored
+import requests
+from pyfiglet import Figlet
+
+def rigoristi():
+
+    try:
+        link="https://www.fantamaster.it/rigoristi-tiratori-seriea-2022-2023-consigli-fantacalcio/"
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+        })
+        r=session.get(link)
+        soup= BeautifulSoup(r.content, "html.parser")
+        buff=""
+        for el in soup.find("div",{"class":"td-post-content tagdiv-type"}).find_all("ul"):
+            if "RIGORISTI" in el.text and "PUNIZIONI" in el.text:
+                buff+=(el.text.split("RIGORISTI: ")[1].split("PUNIZIONI:")[0])+", "
+        lista=[]
+        for el in buff.split(","):
+            if el.strip()=='':
+                continue    
+            lista.append(el.strip())
+        return lista
+    except:
+        return []
 
 def calcola_calendario():
+    #hanno disabilitato il sito, usare l'excel fornito da me o inserire a mano
     try:
         link="https://www.fantacalcio.it/Servizi/Excel.ashx?type=3&t=1657102506000"
         data = pd.read_excel(link, header=1)
@@ -63,8 +90,7 @@ def calcola_classifica():
                     squadra+=c
             squadre.append(squadra.upper())
 
-
-
+        
         link="https://www.repubblica.it/sport/dirette/calcio/serie-a-2022/classifica/"
         r=session.get(link)
         soup= BeautifulSoup(r.content, "html.parser")
@@ -85,7 +111,7 @@ def calcola_classifica():
             if el in retrocesse:
                 squadre=[item.replace(el, nuove[i]) for item in squadre]
                 i+=1
-
+                
         df=pd.DataFrame(squadre, columns=["SQUADRE"])
         df.to_excel('./excel/classifica.xlsx')
         
@@ -93,36 +119,110 @@ def calcola_classifica():
     except:
         return 1
 def calcola_quotazioni():
-    #link ='https://www.fantacalcio.it//Servizi/Excel.ashx?type=0&r=1&t=1652767828000' vecchio
-    #link="https://www.fantacalcio.it/api/v1/Excel/prices/17/1" nuovo
-    
-    if path.exists("./excel/Quotazioni_Fantacalcio.xlsx"):
-        return 0
-    
-    if path.exists("./excel/q.xlsx"):
-        data = pd.read_excel("./excel/q.xlsx", header=1)
-        data.to_excel('./excel/Quotazioni_Fantacalcio.xlsx')
-    else:
-        print("Scaricare il file dal link: https://www.fantacalcio.it/api/v1/Excel/prices/17/1 e chiamarlo q.xlsx")
-        return 1
-    return 0
+    try:
+        link="https://www.fantacalcio.it/api/v1/Excel/prices/17/1"
 
-def calcola_giocatori():
-    #link ='https://www.fantacalcio.it/Servizi/Excel.ashx?type=2&r=1&t=1614489243000&s=2020-21' link vecchio
-    #link="https://www.fantacalcio.it/api/v1/Excel/stats/16/1"
+        headers={
+        "authority": "www.fantacalcio.it",
+        "method": "GET",
+        "path": "/api/v1/Excel/prices/17/1",
+        "scheme": "https",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "it,en-US;q=0.9,en;q=0.8,it-IT;q=0.7",
+        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=KrPH%2BfexHDWjYl7t6%2BYz6ia4Co99jgjt7SnwSeoRwgfZnM4AMYpQx%2FMX%2BmfzXvqNGvVhd8%2Bif4rvZ7KLpASAH8Ppp7PkgGsw3oJWd2OcPdMPEAM3LEVNGNR9ALJDrImrdnvXc4s4AxFAIQBNge8c%2BDqMu9jNaSHg07K8StogKv%2FBcrlzwz3c4qJQNf7bRJ9HA%2BqpPkMZyKcidfpOhqGzmL0XeIKFiLr6QzRqLSsXZkoCVduynfnDyV6C5xgizYmLSyxejdQ1AQXcb9N62sF5Uk8sG8s%2F4CqeLNik86al9lzjYQZWGn61xRSko6kswaw7WtB35gbDn%2Fij87af6i%2FolDd2qF8X0vpqNSOw4edI1jtZWY8ZDfve1CFaSkpcM3uPnYRTclyXfjpFvd3k%2BqLJmLtpG3HwzmTqEOPZxhmet0XLlmwtZCqaKLDYMxJ%2BV%2BESNp7IE8U5zGJygt6oFkHBu3EDggvBr6kM;",
+        "dnt": "1",
+        "sec-ch-ua": "\".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "Windows",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "service-worker-navigation-preload": "true",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
+        'Connection':'close'
+        }
+        
+        
+        r=requests.get(link, headers=headers)
+        output = open('./excel/q.xlsx', 'wb')
+        output.write(r.content)
+        output.close()
 
         
-    if path.exists("./excel/giocatori.xlsx"):
-        return 0
-    #TODO
-    if path.exists("./excel/s.xlsx"):
-        data = pd.read_excel("./excel/s.xlsx", header=1)
-        data.to_excel('./excel/giocatori.xlsx')
-    else:
-        print("Scaricare il file dal link: https://www.fantacalcio.it/api/v1/Excel/stats/16/1 e chiamarlo q.xlsx")
-        return 1
-    return 0
+        
+        
+        data = pd.read_excel("./excel/q.xlsx", header=1)
+        new=pd.DataFrame()
+        new['Id']=data['Id']
+        new['R']=data['R']
+        new['Nome']=data['Nome']
+        new['Squadra']=data['Squadra']
+        new['Qt. A']=data['Qt.A']
+        new['Qt. I']=data['Qt.I']
+        new['Diff']=data['Diff.']
 
+        new.to_excel('./excel/Quotazioni_Fantacalcio.xlsx')
+        os.remove('./excel/q.xlsx')
+        
+        
+        return 0
+    except:
+        return 1
+
+def calcola_giocatori():
+    try:
+        link="https://www.fantacalcio.it/api/v1/Excel/stats/16/1"
+
+        
+        headers={
+        "authority": "www.fantacalcio.it",
+        "method": "GET",
+        "path": "/api/v1/Excel/prices/17/1",
+        "scheme": "https",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "it,en-US;q=0.9,en;q=0.8,it-IT;q=0.7",
+        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=KrPH%2BfexHDWjYl7t6%2BYz6ia4Co99jgjt7SnwSeoRwgfZnM4AMYpQx%2FMX%2BmfzXvqNGvVhd8%2Bif4rvZ7KLpASAH8Ppp7PkgGsw3oJWd2OcPdMPEAM3LEVNGNR9ALJDrImrdnvXc4s4AxFAIQBNge8c%2BDqMu9jNaSHg07K8StogKv%2FBcrlzwz3c4qJQNf7bRJ9HA%2BqpPkMZyKcidfpOhqGzmL0XeIKFiLr6QzRqLSsXZkoCVduynfnDyV6C5xgizYmLSyxejdQ1AQXcb9N62sF5Uk8sG8s%2F4CqeLNik86al9lzjYQZWGn61xRSko6kswaw7WtB35gbDn%2Fij87af6i%2FolDd2qF8X0vpqNSOw4edI1jtZWY8ZDfve1CFaSkpcM3uPnYRTclyXfjpFvd3k%2BqLJmLtpG3HwzmTqEOPZxhmet0XLlmwtZCqaKLDYMxJ%2BV%2BESNp7IE8U5zGJygt6oFkHBu3EDggvBr6kM;",
+        "dnt": "1",
+        "sec-ch-ua": "\".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "Windows",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "service-worker-navigation-preload": "true",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
+        'Connection':'close'
+        }
+        
+        
+        r=requests.get(link, headers=headers)
+        output = open('./excel/g.xlsx', 'wb')
+        output.write(r.content)
+        output.close()
+        #	Id	R	Nome	Squadra	Pg	Mv	Mf	Gf	Gs	Rp	Rc	R+	R-	Ass	Amm	Esp	Au
+        data = pd.read_excel("./excel/g.xlsx", header=1)
+        new=pd.DataFrame()
+        new['Id']=data['Id']
+        new['R']=data['R']
+        new['Nome']=data['Nome']
+        new['Squadra']=data['Squadra']
+        new['Pg']=data['Pg']
+
+
+
+        new.to_excel('./excel/giocatori.xlsx')
+        os.remove('./excel/g.xlsx')
+        
+        
+        return 0
+    except:
+        return 1
 def calc(g,el):
     i=0
     res=0
@@ -153,7 +253,8 @@ def genera_excel():
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-            
+                
+    ris=0
     if not path.exists("./excel/calendario.xlsx"):
         ris+=calcola_calendario()
     if not path.exists("./excel/classifica.xlsx"):
@@ -194,7 +295,7 @@ def por(g1,g2, classifica, d_giocatori, d_calendario):
                 i=classifica.index(avv_1.upper())
                 k=classifica.index(avv_2.upper())
                 value=i+k
-                if value > 15 and casa==1:
+                if  casa==1 and value > 15:
                     tot+=1
                 sq1=0
                 casa=0
@@ -209,7 +310,7 @@ def genera_portieri(scelta):
     d_giocatori['Nome'] = d_giocatori['Nome'].apply(lambda nome : nome.upper())
 
     d_calendario=pd.read_excel("./excel/calendario.xlsx")
-    p=list(d_giocatori.loc[(d_giocatori['R'] == 'P') & (d_giocatori['Pg'] > 1)]['Nome'].values)
+    p=list(d_giocatori.loc[(d_giocatori['R'] == 'P')]['Nome'].values)#&(d_giocatori['Pg'] > 1)
     portieri=[]
     for el in p:
         portieri.append(el.upper())
@@ -228,26 +329,21 @@ def genera_portieri(scelta):
     #rispetto casa e diff partita
     new_diz={k: v for k, v in diz.items() if v}
     ret_diz={k: v for k, v in sorted(new_diz.items(), key=lambda item: int(item[1]),reverse=True)}
+    d_5 = [v for v in list(ret_diz.keys())[:20]]
+    m_5 = [v for v in list(new_diz.keys())[:20]]
     if scelta==1:
-        return ret_diz
+        return d_5
     elif scelta==2:
-        return ret_marks
+        return m_5
     return
-def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
-    giocatori_risultato=[]
-    
-    valori_risultato=[]
+def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     tit_risultato=[]
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=8-len(acquistati)   
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
-
     t=x.loc[(x['R']=='D')]       
-    ### funzione prezzo
-    #x1 = [1,5,10,15,20,25,30]
-    #y1 = [1,10,15,20,30,40,50]
     a,b,c = np.polyfit(x1, y1, 2)
     try:
         p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
@@ -256,16 +352,13 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
     prezzo_probabile=a*p*p+b*p+c
     try:
         gf=(t[t['Nome'].str.contains(giocatore_chiamato.upper())]['Gf'].values[0])
-
     except:
         gf=0        
-
     print("Gol scorsa stagione:",gf)
     print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",prezzo_probabile)
+    print("Prezzo probabile d'asta:",int(prezzo_probabile))
     difensori=quotazioni.loc[(quotazioni['R'] == 'D')]
-    ds=list(quotazioni.loc[(quotazioni['R'] == 'D')]['Nome'].values)
-    prezzo_ris=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+    ds=list(quotazioni.loc[(quotazioni['R'] == 'D')].sort_values(by='Qt. A')['Nome'].values)
     squadre=[]
     valore_reparto=0
     valore=0
@@ -274,90 +367,81 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
             squadre.append(difensori[difensori['Nome'].str.contains(g.upper())]['Squadra'].item())
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].item())
         valore=round(valore_reparto/len(acquistati),0)
-    if  budget_rimasto -da_comprare <= 0:
-        print("Si ha sforato il budget, verranno suggeriti solo giocatori a poco")
-        ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
+    print("Valore Reparto attuale:",valore)
+    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+        ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             d=random.choice(ds)
-            if d.upper() not in acquistati:
+            if d.upper() not in acquistati and d.upper() not in giachiamati:
                 acquistati.append(d)
-                
-                prezzo=1
-                budget_rimasto=budget_rimasto-1
                 try:
                     tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
-                   
                 except:
                     tit=1  
-
+                try:
+                    v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].item())
+                except:
+                    v=1
+                budget_rimasto=budget_rimasto-v
                 titolarieta=int(tit)
                 tit_risultato.append(titolarieta)
-                valori_risultato.append("1")
-                giocatori_risultato.append(d)
                 k+=1
-        return 0,prezzo_ris,tit_risultato
+        return 0,p,tit_risultato
     while(len(acquistati)!=8):
         d=random.choice(ds)
-        if len(t[t['Nome'].str.contains(d.upper())]['Pg'])==0:
-            
+        if d.upper() in acquistati or d.upper() in giachiamati:
             continue
-        tit=int(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
-        if int(tit)==0:
-            
+        try:
+            tit=int(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+        except:
+            tit=0
+        if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'])>1:#serve per problemi col excel
+                continue
+        try:
+            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].item())
+        except:
+            v=1
+        if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
             continue
         titolarieta=int(tit)
         try:
             gf=(t[t['Nome'].str.contains(d.upper())]['Gf'].values[0])
         except:
             gf=0        
-        
-        if d.upper() not in acquistati and (titolarieta>10 or gf>3):
-            if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'])>1:
-                
-                continue
-            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].item())
+        if titolarieta>10 or gf>3:
             prezzo_previsto=int(a*v*v+b*v+c)
-            new_budg=budget_rimasto-v
-            if new_budg<=0:
-                
-                continue
+            new_budg=budget_rimasto-prezzo_previsto# se troppo alto metti v
             if new_budg > da_comprare:
                 acquistati.append(d)
                 da_comprare-=1
                 prezzo=budget_rimasto-new_budg
                 budget_rimasto=new_budg
-                tit_risultato.append(titolarieta)
-                valori_risultato.append(v)
-                giocatori_risultato.append(d)
-                
-                ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & ((quotazioni['Qt. A'])<= budget_rimasto)]['Nome'].values)
+                tit_risultato.append(titolarieta)                
+                ds=list(quotazioni.loc[(quotazioni['R'] == 'D')]['Nome'].values)
                 if d in ds:
                     ds.remove(d)
-            if budget_rimasto <= da_comprare:
-                ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
-                for k in range(0,da_comprare):
+            if new_budg <= da_comprare:
+                ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+                k=0
+                while(k<da_comprare):
                     d=random.choice(ds)
-                    if d not in acquistati:
+                    if d.upper() not in acquistati and d.upper() not in giachiamati:
                         acquistati.append(d)
-                        
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
-                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                            tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
                         except:
                             tit=1
                         titolarieta=int(tit)
                         tit_risultato.append(titolarieta)
-                        valori_risultato.append("1")
-                        giocatori_risultato.append(d)
                         k+=1
-                return 0,prezzo_ris,tit_risultato
+                return 0,p,tit_risultato
             else:
-                
                 continue
         else:
             continue
-    return 0,prezzo_ris,tit_risultato
+    return 0,p,tit_risultato
 def difensori(u,budget):
     i=1
     acquistati=[]
@@ -367,6 +451,8 @@ def difensori(u,budget):
     valori=[]
     giachiamati=[]
     valore_reparto=0
+
+    
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
@@ -376,30 +462,57 @@ def difensori(u,budget):
     ### funzione prezzo
     x1 = [1,5,10,15,20,25,30]
     y1 = [1,10,15,20,30,40,50]
-      
     
+    try:
+        d=pd.read_excel("./old lega/dif.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
+        for el in d['VALORE ACQUISTO']:
+            y1.append(int(el))
+        for el in d['VALORE ATTUALE']:
+            x1.append(int(el))
+    except:
+        pass
+    lista=[]
+    try:
+        f=open("./src/rigoristi.txt","r")
+        lista=f.readlines()
+        f.close()
+    except:
+        pass
     while(i!=9):
+
         a,b,c = np.polyfit(x1, y1, 2)
         #input("Premere Invio per continuare ")
         os.system('CLS')      
+     
         print("Budget Totale:",u)
         print("Budget Reparto:",budget)
+        buff=""
+        for el in reparto_finale.keys():
+            buff+=el+" "
+        print("Reparto Attuale:",buff)
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
         
         giocatore=input("Difensore ").upper()
+        if len(giocatore)<3:
+            print("Inserire almeno 3 caratteri.")
+            input("Premere Invio per continuare ")
+            #acquistati.remove(giocatore)
+            acquistati=[]
+            continue
         trovato=0
         for g in quotazioni['Nome']:
-            if giocatore.upper()==g.upper():
+            
+            if giocatore.upper() == g.upper():
                 trovato=1
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
-            print("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]")
+            print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
-            if (scelta !="y" or scelta !="Y") and len(scelta)>0:
-                print("Giocatore non trovato, riprova.")
+            if scelta !="y" and scelta !="Y" and len(scelta)>0:
+                print(colored("Giocatore non trovato, riprova.",'red'))
                 input("Premere Invio per continuare ")
                 #acquistati.remove(giocatore)
                 acquistati=[]
@@ -409,26 +522,30 @@ def difensori(u,budget):
                 
         
         if giocatore in reparto_finale.keys() or giocatore in giachiamati:
-            print("Giocatore già acquistato.")
+            print(colored("Giocatore già acquistato.",'red'))
             input("Premere Invio per continuare ")
+            acquistati=[]
             continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,tit_risultato=dif(giocatore,acquistati,budget,x1,y1)
-
+        ok,prezzo,tit_risultato=dif(giocatore,acquistati,budget,x1,y1,giachiamati)
+        for el in lista:
+            if giocatore.upper().strip()==el.strip():
+                print(colored("Probabile rigorista",'green'))
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
         ptpr=0
         prt=0
+        xxx=0
         for el in acquistati:
             if el in reparto_finale.keys():
                 p=int(reparto_finale[el])
                 prezzo_probabile=p
             else:    
                 try:
-                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].item())
+                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
                 prezzo_probabile=a*p*p+b*p+c
@@ -438,53 +555,67 @@ def difensori(u,budget):
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
                 gf=0
+            
             try:
                 tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
+                xxx+=round(round(int(tit)/38,2)*100,2)
             except:
                 tit=0
+            try:    
+                s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
+            except:
+                s=""
             if el.upper() == giocatore.upper():
                 tx=round(round(int(tit)/38,2)*100,2)
-            lista_print.append([el,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","",""])
+        lista_print.append(["","","","","",""])
         lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","",""])
         lista_print.append(["Prezzo Totale Probabile:",int(prt),"","",""])
         prezzo=int(prezzo)    
-        tit=0
-        for el in tit_risultato:
-            tit+=round(round(int(el)/38,2)*100,2)
-        lista_print.append(["Indice titolarietà medio squadra:",str(round(tit/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        
+        lista_print.append(["Indice titolarietà medio squadra:",str(round(xxx/8,2))+"%","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
         lista_print.clear()
 
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if valore_temp>valore_prima:
+        if int((valore_temp-valore_prima)*100) >150:
         
-            print("+",int((valore_temp-valore_prima)*100),"% qualità alla squadra.")
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        elif int((valore_temp-valore_prima)*100) >100:
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
         else:
-            print("",int((valore_temp-valore_prima)*100),"% qualità alla squadra.")
-        if prezzo>budget-(8-len(new_acquisti)):
-            print("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+
+        if prezzo>budget-(8-len(new_acquisti)) or int(a*prezzo*prezzo+b*prezzo+c)>budget:
+            print(colored(("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c)),'yellow'))
 
         elif valore_temp > valore_prima and tx>55:
-            print("Si acquistalo ma al massimo spendi:",prezzo)
+            print(colored(("Si acquistalo ma al massimo spendi:",prezzo),'green'))
             print("Probabile prezzo d'asta: circa",int(a*prezzo*prezzo+b*prezzo+c))
         else:
-            print("Non acquistarlo.")
+            print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            q=int(input("A quanto è andato? "))
-            x1.append(prezzo)
-            y1.append(q)        
-            giachiamati.append(giocatore)
-            print("", end="\r")
-            acquistati=[]
-            continue        
+            try:
+                q=input("A quanto è andato? ")
+                q=int(q)
+                x1.append(prezzo)
+                y1.append(q)
+                giachiamati.append(giocatore)
+                print("", end="\r")
+                acquistati=[]
+                continue  
+            except:
+                acquistati=[]
+                giachiamati.append(giocatore)
+                continue
         try:
             if int(quanto)>0:
                 x1.append(prezzo)
-                y1.append(int(quanto))            
+                y1.append(int(quanto))
+                giachiamati.append(giocatore)                            
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u-=int(quanto)
@@ -496,12 +627,11 @@ def difensori(u,budget):
         except:
             print("", end="\r")
             acquistati=[]
+            giachiamati.append(giocatore)  
             continue
         print("", end="\r")
     return reparto_finale
-def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
-    giocatori_risultato=[]
-    valori_risultato=[]
+def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
     tit_risultato=[]
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
@@ -509,112 +639,106 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='C')]
-    ### funzione prezzo
-    #x1 = [1,5,10,15,20,25,30,35]
-    #y1 = [1,10,20,30,35,40,50,60]
     a,b,c = np.polyfit(x1, y1, 2)
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
     except:
         return 1,0,[]
     prezzo_probabile=a*p*p+b*p+c
+    if prezzo_probabile <=0:
+        prezzo_probabile=1
     try:
         gf=(t[t['Nome'].str.contains(giocatore_chiamato.upper())]['Gf'].values[0])
     except:
         gf=0        
-
     print("Gol scorsa stagione:",gf)
     print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",prezzo_probabile)
+    print("Prezzo probabile d'asta:",int(prezzo_probabile))
     centrocampisti=quotazioni.loc[(quotazioni['R'] == 'C')]
-    cs=list(quotazioni.loc[(quotazioni['R'] == 'C')]['Nome'].values)
-    prezzo_ris=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+    cs=list(quotazioni.loc[(quotazioni['R'] == 'C')].sort_values(by='Qt. A', ascending=False)['Nome'].values)
     squadre=[]
     valore_reparto=0
     valore=0
     if len(acquistati)!=0:
         for g in acquistati:
-            squadre.append(centrocampisti[centrocampisti['Nome'].str.contains(g.upper())]['Squadra'].item())
-            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].item())
+            squadre.append(centrocampisti[centrocampisti['Nome'].str.contains(g.upper())]['Squadra'].values[0])
+            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-    i=0
-    if  budget_rimasto -da_comprare <= 0:
-        print("Si ha sforato il budget, verranno suggeriti solo giocatori a poco")
-        cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
+    print("Valore Reparto attuale:",valore)
+    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+        cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             cx=random.choice(cs)
-            if cx.upper() not in acquistati:
+            if cx.upper() not in acquistati and cx.upper() not in giachiamati:
                 acquistati.append(cx)
-                i=0
-                prezzo=1
-                budget_rimasto=budget_rimasto-1
                 try:
-                    tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                    v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].values[0])
+                except:
+                    v=1
+                budget_rimasto=budget_rimasto-v
+                try:
+                    tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
                 except:
                     tit=1
                 titolarieta=int(tit)
                 tit_risultato.append(titolarieta)
-                valori_risultato.append("1")
-                giocatori_risultato.append(cx)
                 k+=1
-        return 0,prezzo_ris,tit_risultato
+        return 0,p,tit_risultato
     while(len(acquistati)!=8):
         cx=random.choice(cs)
-        if len(t[t['Nome'].str.contains(cx.upper())]['Pg'])==0:
-            #forse giocatore nuovo, ma non lo considero
+        if cx.upper() in acquistati or cx.upper() in giachiamati:
             continue
-        tit=int(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
-        if int(tit)==0:
+        try:
+            tit=int(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+        except:
+            tit=0            
+        if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'])>1:
+            continue
+        try:
+            v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].values[0])
+        except:
+            v=1 
+        if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
             continue
         titolarieta=int(tit)
-        
         try:
             gf=(t[t['Nome'].str.contains(cx.upper())]['Gf'].values[0])
         except:
             gf=0        
-        
-        if cx.upper() not in acquistati and (titolarieta>10 or gf>5):
-            if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'])>1:
-                continue
-            v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].item())
+        if titolarieta>10 or gf>3:
             prezzo_previsto=int(a*v*v+b*v+c)
-            new_budg=budget_rimasto-v
-            if new_budg<=0:
-                continue
+            new_budg=budget_rimasto-prezzo_previsto#v
             if new_budg > da_comprare:
                 acquistati.append(cx)
                 da_comprare-=1
                 prezzo=budget_rimasto-new_budg
                 budget_rimasto=new_budg
                 tit_risultato.append(titolarieta)
-                valori_risultato.append(v)
-                giocatori_risultato.append(cx)
-                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A'])<= budget_rimasto)]['Nome'].values)
+                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A'])< 5)]['Nome'].values)
                 if cx in cs:
                     cs.remove(cx)
             if budget_rimasto <= da_comprare:
-                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
-                for k in range(0,da_comprare):
+                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A']) < budget_rimasto)]['Nome'].values)
+                k=0
+                while(k <da_comprare):
                     cx=random.choice(cs)
-                    if cx not in acquistati:
+                    if cx not in acquistati and cx.upper() not in giachiamati:
                         acquistati.append(cx)
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
-                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                            tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
                         except:
                             tit=1
                         titolarieta=int(tit)
                         tit_risultato.append(titolarieta)
-                        valori_risultato.append("1")
-                        giocatori_risultato.append(cx)
                         k+=1
-                return 0,prezzo_ris,tit_risultato
+                return 0,p,tit_risultato
             else:
                 continue
         else:
             continue
-    return 0,prezzo_ris,tit_risultato
+    return 0,p,tit_risultato
 def centrocampisti(u,budget):
     i=1
     acquistati=[]
@@ -634,6 +758,22 @@ def centrocampisti(u,budget):
     
     x1 = [1,5,10,15,20,25,30,35]
     y1 = [1,10,20,30,35,40,50,60]
+    
+    try:
+        d=pd.read_excel("./old lega/centr.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
+        for el in d['VALORE ACQUISTO']:
+            y1.append(int(el))
+        for el in d['VALORE ATTUALE']:
+            x1.append(int(el))
+    except:
+        pass
+    lista=[]
+    try:
+        f=open("./src/rigoristi.txt","r")
+        lista=f.readlines()
+        f.close()
+    except:
+        pass
     while(i!=9):
         #input("Premere Invio per continuare ")
         a,b,c = np.polyfit(x1, y1, 2)
@@ -641,11 +781,21 @@ def centrocampisti(u,budget):
         os.system('CLS')   
         print("Budget Totale:",u)        
         print("Budget Reparto:",budget)
+        buff=""
+        for el in reparto_finale.keys():
+            buff+=el+" "
+        print("Reparto Attuale:",buff)
+
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
         giocatore=input("Centrocampista ").upper()
-
+        if len(giocatore)<3:
+            print(colored("Inserire almeno 3 caratteri.",'red'))
+            input("Premere Invio per continuare ")
+            #acquistati.remove(giocatore)
+            acquistati=[]
+            continue
         trovato=0
         for g in quotazioni['Nome']:
             if giocatore.upper()==g.upper():
@@ -653,26 +803,28 @@ def centrocampisti(u,budget):
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
-            print("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]")
+            print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
-            if (scelta !="y" or scelta !="Y") and len(scelta)>0:
-                print("Giocatore non trovato, riprova.")
+            if scelta !="y" and scelta !="Y" and len(scelta)>0:
+                print(colored("Giocatore non trovato, riprova.",'red'))
                 input("Premere Invio per continuare ")
                 #acquistati.remove(giocatore)
                 acquistati=[]
                 continue
             else:
                 giocatore=gx
-        if giocatore in reparto_finale.keys() or giocatore in giachiamati:
-            print("Giocatore già acquistato.")
+        if giocatore in reparto_finale.keys() or giocatore.upper() in giachiamati:
+            print(colored("Giocatore già acquistato.",'red'))
             input("Premere Invio per continuare ")
             acquistati=[]
             continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,tit_risultato=centr(giocatore,acquistati,budget,x1,y1)
-
+        ok,prezzo,tit_risultato=centr(giocatore,acquistati,budget,x1,y1, giachiamati)
+        for el in lista:
+            if giocatore.upper().strip()==el.strip():
+                print(colored("Probabile rigorista",'green'))
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
@@ -684,12 +836,15 @@ def centrocampisti(u,budget):
                 prezzo_probabile=p
             else:    
                 try:
-                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].item())
+                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
                 prezzo_probabile=a*p*p+b*p+c
+            if prezzo_probabile <=0:
+                prezzo_probabile=1
             ptpr+=p
             prt+=prezzo_probabile
+            
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
@@ -698,64 +853,78 @@ def centrocampisti(u,budget):
                 tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
             except:
                 tit=0
+            try:    
+                s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
+            except:
+                s=""                
             if el.upper() == giocatore.upper():
                     tx=round(round(int(tit)/38,2)*100,2)
-            lista_print.append([el,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","",""])
+        lista_print.append(["","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
         prezzo=int(prezzo)    
         tit=0
         for el in tit_risultato:
             tit+=round(round(int(el)/38,2)*100,2)
-        lista_print.append(["Indice titolarietà medio squadra:",str(round(tit/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        
+        lista_print.append(["Indice titolarietà medio reparto:",str(round(tit/8,2))+"%","","",""])
+        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if valore_temp>valore_prima:
+        if int((valore_temp-valore_prima)*100) >150:
         
-            print("+",int((valore_temp-valore_prima)*100),"% qualità alla squadra.")
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        elif int((valore_temp-valore_prima)*100) >100:
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
         else:
-            print("",int((valore_temp-valore_prima)*100),"% qualità alla squadra.")
-        if prezzo>budget-(8-len(new_acquisti)):
-            print("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+
+        if prezzo>budget-(8-len(new_acquisti)) or int(a*prezzo*prezzo+b*prezzo+c)>budget:
+            print(colored(("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c)),'yellow'))
         elif valore_temp > valore_prima and tx > 55:
-            print("Si acquistalo ma al massimo spendi:",prezzo)
+            print(colored(("Si acquistalo ma al massimo spendi:",int(a*prezzo*prezzo+b*prezzo+c)),'green'))
             print("Probabile prezzo d'asta: circa",int(a*prezzo*prezzo+b*prezzo+c))
         else:
-            print("Non acquistarlo.")
+            print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            q=int(input("A quanto è andato? "))
-            x1.append(prezzo)
-            y1.append(q)        
-            giachiamati.append(giocatore)
-            print("", end="\r")
-            acquistati=[]
-            continue        
+            try:
+                q=input("A quanto è andato? ")
+                q=int(q)
+                x1.append(prezzo)
+                y1.append(q)        
+                giachiamati.append(giocatore)
+                print("", end="\r")
+                acquistati=[]
+                continue                   
+            except:
+                acquistati=[]
+                giachiamati.append(giocatore)
+                continue
         try:
             if int(quanto)>0:
                 x1.append(prezzo)
-                y1.append(int(quanto))            
+                y1.append(int(quanto))    
+                giachiamati.append(giocatore.upper())                    
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u-=int(quanto)
                 valori.append(prezzo)
                 valore_prima=valore_temp
-                new_acquisti.append(giocatore)
+                new_acquisti.append(giocatore.upper())
                 i+=1
             acquistati=[]
         except:
+            giachiamati.append(giocatore.upper())  
             print("", end="\r")
             acquistati=[]
             continue
         print("", end="\r")
     return reparto_finale
-def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
-    giocatori_risultato=[]
-    valori_risultato=[]
+def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     tit_risultato=[]    
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
@@ -763,97 +932,107 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='A')]
-    ### funzione prezzo
-    #x1 = [1,5,10,15,20,25,30,35,40,45]
-    #y1 = [1,10,30,40,50,70,90,120,150,180]
     a,b,c = np.polyfit(x1, y1, 2)
+
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
     except:
-        return 1,0,[]
+        return 1,0,1,[]
     prezzo_probabile=a*p*p+b*p+c
+      
     
+    if prezzo_probabile <=0:
+        prezzo_probabile=1
     try:
         gf=(t[t['Nome'].str.contains(giocatore_chiamato.upper())]['Gf'].values[0])
     except:
-        gf=0        
-
+        gf=0      
+        
+    prezzo_ritorno=int(prezzo_probabile)
     print("Gol scorsa stagione:",gf)
     print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",prezzo_probabile)
+    print("Prezzo probabile d'asta:",int(prezzo_probabile))
     attaccanti=quotazioni.loc[(quotazioni['R'] == 'A')]
-    ass=list(quotazioni.loc[(quotazioni['R'] == 'A')]['Nome'].values)
-    prezzo_ris=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+    ass=list(quotazioni.loc[(quotazioni['R'] == 'A')].sort_values(by='Qt. A', ascending=False)['Nome'].values)
     squadre=[]
     valore_reparto=0
     valore=0
     if len(acquistati)!=0:
         for g in acquistati:
-            squadre.append(attaccanti[attaccanti['Nome'].str.contains(g.upper())]['Squadra'].item())
-            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].item())
+            squadre.append(attaccanti[attaccanti['Nome'].str.contains(g.upper())]['Squadra'].values[0])
+            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-    
-    if  budget_rimasto -da_comprare <= 0:
-        print("Si ha sforato il budget, verranno suggeriti solo giocatori a poco")
-        ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
+    print("Valore reparto attuale:",valore)
+    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+        ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             ax=random.choice(ass)
-            if ax.upper() not in acquistati:
+            if ax.upper() not in acquistati and ax.upper() not in giachiamati:
                 acquistati.append(ax)
                 prezzo=1
                 budget_rimasto=budget_rimasto-1
                 try:
-                
                     tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
                 except:
                     tit=1
                 titolarieta=int(tit)
                 tit_risultato.append(titolarieta)
-                valori_risultato.append("1")
-                giocatori_risultato.append(ax)
+                
                 k+=1
-        return 0,prezzo_ris,tit_risultato
+        return 0,p,prezzo_ritorno,tit_risultato
+    tentativi=0
+    i=0
     while(len(acquistati)!=6):
-        ax=random.choice(ass)
-        if len(t[t['Nome'].str.contains(ax.upper())]['Pg'])==0:
+        #ax=random.choice(ass)
+        try:
+            ax=ass[i]
+        except:
+            ax=random.choice(ass)
+        i+=1
+        if ax.upper() in acquistati or ax.upper() in giachiamati:
             continue
-        tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
-        if int(tit)==0:
+        try:
+            tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+        except:
+            tit=0
+        #if len(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'])>1:#serve per problemi col excel            
+        #    tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+        try:
+            v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].values[0])
+        except:
+            v=1
+        if int(tit)==0 and v<5:
             continue
         titolarieta=int(tit)
         try:
-            gf=(t[t['Nome'].str.contains(d.upper())]['Gf'].values[0])
+            gf=(t[t['Nome'].str.contains(ax.upper())]['Gf'].values[0])
         except:
-            gf=0        
-        
-        if ax.upper() not in acquistati and (titolarieta>10 or gf>0):
-            if len(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'])>1:
-                continue
-            v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].item())
+            gf=0
+        try:
+            p=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].values[0])
+        except:
+            p=0
+        if  (titolarieta>10 and tentativi>100) or gf>5 or p> 20:
             prezzo_previsto=int(a*v*v+b*v+c)
             new_budg=budget_rimasto-prezzo_previsto
             if new_budg<=0:
-                new_budg=budget_rimasto-v
                 continue
             if new_budg > da_comprare:
                 acquistati.append(ax)
                 da_comprare-=1
                 prezzo=budget_rimasto-new_budg
                 budget_rimasto=new_budg
-                tit_risultato.append(titolarieta)
-                valori_risultato.append(v)
-                giocatori_risultato.append(ax)
-                
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & ((quotazioni['Qt. A'])<= budget_rimasto)]['Nome'].values)
+                tit_risultato.append(titolarieta)                
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & ((quotazioni['Qt. A'])<= 5)]['Nome'].values)
                 if ax in ass:
                     ass.remove(ax)
             if budget_rimasto <= da_comprare:
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] == 1)]['Nome'].values)
-                for k in range(0,da_comprare):
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < new_budg)]['Nome'].values)
+                k=0
+                while(k<da_comprare):
                     ax=random.choice(ass)
-                    if ax not in acquistati:
+                    if ax not in acquistati and ax not in giachiamati:
                         acquistati.append(ax)
-                        
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
@@ -862,16 +1041,32 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1):
                             tit=1
                         titolarieta=int(tit)
                         tit_risultato.append(titolarieta)
-                        valori_risultato.append("1")
-                        giocatori_risultato.append(ax)
                         k+=1
-                return 0,prezzo_ris,tit_risultato
+                        
+                return 0,p,prezzo_ritorno,tit_risultato
             else:
-                
                 continue
         else:
+            tentativi+=1 
+            if tentativi > 200:
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 10)]['Nome'].values)
+                k=0 
+                while(k<da_comprare):
+                    ax=random.choice(ass)
+                    if ax not in acquistati and ax not in giachiamati:
+                        acquistati.append(ax)
+                        prezzo=1
+                        budget_rimasto=budget_rimasto-1
+                        try:
+                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                        except:
+                            tit=1
+                        titolarieta=int(tit)
+                        tit_risultato.append(titolarieta)
+                        k+=1
+                return 0,p,prezzo_ritorno,tit_risultato
             continue
-    return 0,prezzo_ris,tit_risultato
+    return 0,p,prezzo_ritorno,tit_risultato
 def attaccanti(u,budget):
     i=1
     acquistati=[]
@@ -889,7 +1084,24 @@ def attaccanti(u,budget):
     quotazioni=quotazioni.loc[(quotazioni['R']=='A')]     
     
     x1 = [1,5,10,15,20,25,30,35,40,45]
-    y1 = [1,10,30,40,50,70,90,120,150,180]
+    y1 = [1,10,30,40,50,70,110,140,160,200]
+    
+    try:
+        d=pd.read_excel("./old lega/att.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
+        for el in d['VALORE ACQUISTO']:
+            y1.append(int(el))
+        for el in d['VALORE ATTUALE']:
+            x1.append(int(el))
+    except:
+        pass
+    lista=[]
+    try:
+        f=open("./src/rigoristi.txt","r")
+        lista=f.readlines()
+        f.close()
+    except:
+        pass
+        
     
     while(i!=7):
         a,b,c = np.polyfit(x1, y1, 2)
@@ -897,17 +1109,21 @@ def attaccanti(u,budget):
         os.system('CLS')        
         print("Budget Totale:",u)
         print("Budget Reparto:",budget)
-        
+        buff=""
+        for el in reparto_finale.keys():
+            buff+=el+" "
+        print("Reparto Attuale:",buff)
         for el in valori:
             valore_reparto+=el/(len(acquistati)+1)
         print("#"+str(i))
         giocatore=input("Attaccante ").upper()
-        if giocatore.upper() in reparto_finale.keys() or giocatore.upper() in giachiamati:
-            print("Giocatore già acquistato.")
+        if len(giocatore)<3:
+            print(colored("Inserire almeno 3 caratteri.",'red'))
             input("Premere Invio per continuare ")
+            #acquistati.remove(giocatore)
             acquistati=[]
-            continue
-            
+            continue        
+
         trovato=0
         for g in quotazioni['Nome']:
             if giocatore.upper()==g.upper():
@@ -915,26 +1131,28 @@ def attaccanti(u,budget):
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
-            print("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]")
+            print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
-            if (scelta !="y" or scelta !="Y") and len(scelta)>0:
-                print("Giocatore non trovato, riprova.")
+            if scelta !="y" and scelta !="Y" and len(scelta)>0:
+                print(colored("Giocatore non trovato, riprova.",'red'))
                 input("Premere Invio per continuare ")
                 #acquistati.remove(giocatore)
                 acquistati=[]
                 continue
             else:
                 giocatore=gx
-        if giocatore in reparto_finale.keys() or giocatore in giachiamati:
-            print("Giocatore già acquistato.")
+        if giocatore in reparto_finale.keys() or giocatore.upper() in giachiamati:
+            print(colored("Giocatore già acquistato.",'red'))
             input("Premere Invio per continuare ")
             acquistati=[]
             continue
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,tit_risultato=att(giocatore,acquistati,budget,x1,y1)
-
+        ok,prezzo,pr,tit_risultato=att(giocatore,acquistati,budget,x1,y1, giachiamati)
+        for el in lista:
+            if giocatore.upper().strip()==el.strip():
+                print(colored("Probabile rigorista",'green'))
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
@@ -946,10 +1164,12 @@ def attaccanti(u,budget):
                 prezzo_probabile=p
             else:    
                 try:
-                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].item())
+                    p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
                 prezzo_probabile=a*p*p+b*p+c
+            if prezzo_probabile <=0:
+                prezzo_probabile=1
             ptpr+=p
             prt+=prezzo_probabile
             try:
@@ -960,43 +1180,58 @@ def attaccanti(u,budget):
                 tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
             except:
                 tit=0
+            try:
+                s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
+            except:
+                s=""
             if el.upper() == giocatore.upper():
                 tx=round(round(int(tit)/38,2)*100,2)
-            lista_print.append([el,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
-        lista_print.append(["","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","",""])
+                
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+        lista_print.append(["","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
         prezzo=int(prezzo)    
         tit=0
         for el in tit_risultato:
             tit+=round(round(int(el)/38,2)*100,2)
         lista_print.append(["Indice titolarietà medio reparto:",str(round(tit/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if valore_temp>valore_prima:
+        if int((valore_temp-valore_prima)*100) >150:
         
-            print("+",int((valore_temp-valore_prima)*100),"% qualità al reparto.")
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        elif int((valore_temp-valore_prima)*100) >100:
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
         else:
-            print("",int((valore_temp-valore_prima)*100),"% qualità al reparto.")
-        if prezzo>budget-(6-len(new_acquisti)) or int(a*prezzo*prezzo+b*prezzo+c)>budget:
-            print("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+
+        if prezzo>budget-(6-len(new_acquisti)) or pr>budget:
+            print(colored(("Mmm, costa tanto, circa ",pr),'yellow'))
         elif valore_temp > valore_prima or tx > 50:
             
-            print("Si acquistalo ma al massimo spendi:",int(a*prezzo*prezzo+b*prezzo+c))
-            print("Probabile prezzo d'asta: circa",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored(("Si acquistalo ma al massimo spendi:",pr),'green'))
+            print("Probabile prezzo d'asta: circa",pr)
         else:
-            print("Non acquistarlo.")
+            print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            q=int(input("A quanto è andato? "))
-            x1.append(prezzo)
-            y1.append(q)
-            print("", end="\r")
-            acquistati=[]
-            giachiamati.append(giocatore.upper())
-            continue        
+            try:
+                q=input("A quanto è andato? ")
+                q=int(q)
+                x1.append(prezzo)
+                
+                y1.append(q)
+                print("", end="\r")
+                acquistati=[]
+                giachiamati.append(giocatore)
+                continue        
+            except:
+                acquistati=[]
+                giachiamati.append(giocatore)
+                continue
         try:
             if int(quanto)>0:
                 x1.append(prezzo)
@@ -1006,18 +1241,20 @@ def attaccanti(u,budget):
                 u=u-int(quanto)
                 valori.append(prezzo)
                 valore_prima=valore_temp
-                new_acquisti.append(giocatore)
+                new_acquisti.append(giocatore.upper())
+                giachiamati.append(giocatore.upper())
                 i+=1
             acquistati=[]
         except:
             print("", end="\r")
             acquistati=[]
+            giachiamati.append(giocatore)
             continue
         print("", end="\r")
     return reparto_finale
 def a(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
-    print("Lista attaccanti puntando sul valore:")
-    print("BUDGET ATTACCANTI",budg_att)
+    if budg_att> budget_tot:
+        budg_att=budget_tot
     reparto=attaccanti(budget_tot,budg_att)
     print(reparto)
     w_d=open("./src/attaccanti.txt", "w")
@@ -1031,14 +1268,14 @@ def a(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Hai speso troppo, multa. :(")
         print("Crediti spesi in più:",abs(budg_att-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,budg_dif,budg_centr,budg_att-spesa)
+        salvasuFile(budget_tot,budget_att-spesa,0,0,0,0)
     else:
         print("Crediti rimasti:",(budg_att-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile((budg_att-spesa),budget_tot-spesa,budg_portieri,budg_dif,budg_centr,budg_att)
+        salvasuFile(budget_tot-spesa,(budg_att-spesa),0,0,0,0)
 def c(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
-    print("Lista centrocampisti puntando sulla titolarità:")
-    print("BUDGET CENTROCAMPISTI",budg_centr)
+    if budg_centr> budget_tot:
+        budg_centr=budget_tot
     reparto=centrocampisti(budget_tot,budg_centr)
     print(reparto)
     w_c=open("./src/centrocampisti.txt", "w")
@@ -1049,19 +1286,19 @@ def c(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         w_c.write(buff)
         w_c.write("\n")
     if spesa> int(budg_centr):
-        print("Hai speso troppo, verranno scalati crediti sugli attaccanti.")
+        print(colored("Hai speso troppo, verranno scalati crediti sugli attaccanti.",'red'))
         print("Crediti spesi in più:",abs(budg_centr-spesa))
         print("Att:",budg_att-abs(budg_centr-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,budg_dif,0,budg_att-abs(budg_centr-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,0,budg_att-abs(budg_centr-spesa))
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_centr-spesa))
         print("Att:",budg_att+(budg_centr-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,budg_dif,budg_centr,budg_att+(budg_centr-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,0,budg_att+(budg_centr-spesa))
 def d(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
-    print("Lista difensori puntando sulla titolarità:")
-    print("BUDGET DIFENSORI",budg_dif)
+    if budg_dif> budget_tot:
+        budg_dif=budget_tot
     reparto=(difensori(budget_tot,budg_dif))
     print(reparto)
     w_d=open("./src/difensori.txt", "w")
@@ -1077,31 +1314,41 @@ def d(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Centr:",budg_centr-abs(budg_dif-spesa))
         print("Att:",budg_att+(budg_dif-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,0,budg_centr-abs(budg_dif-spesa),budg_att+(budg_dif-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr-abs(budg_dif-spesa),budg_att+(budg_dif-spesa))
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_dif-spesa))
         print("Cent:",budg_centr)
         print("Att:",budg_att+(budg_dif-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,budg_dif-spesa,budg_centr,budg_att+(budg_dif-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr,budg_att+(budg_dif-spesa))
 def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     w_p=open("./src/portieri.txt", "w")
     print("BUDGET PORTIERI:",budg_portieri)
-    print("Lista portieri migliori a seconda del calendario:")
+    print("Lista portieri migliori a seconda del calendario: fattore casa e difficoltà partita:")
     print(genera_portieri(1))
-    print("Lista portieri migliori a seconda del valore")
-    print(genera_portieri(2))
+    print("##############")
+    print("PUNTA SU")
+    print("1) VICARIO")
+    print("2) TERRACCIANO o DRAGOWSKI")
+    print("3) RADU I.")
+    print("###############")
     spesa=0
-    j=0
-    for j in range(1,4):
+    j=1
+    while(j<4):
         
         p=input("Inserire il portiere #"+str(j)+":")
         prezzi=input("Inserire i crediti spesi: ")
-
+        
+        try:
+            spesa+=int(prezzi)
+        except:
+            print("Inserire un valore intero.")
+            continue
         buff=""+p.upper()+" : "+prezzi
         w_p.write(buff)
         w_p.write("\n")
         spesa+=int(prezzi)
+        j+=1
     
     
     if spesa> int(budg_portieri):
@@ -1118,7 +1365,7 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Cent:",budg_centr)
         print("Att:",budg_att+(budg_portieri-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,budg_portieri,budg_dif,budg_centr,budg_att+(budg_portieri-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif,budg_centr,budg_att+(budg_portieri-spesa))
 def salvasuFile(tot,rimasti,port,dif,centr,att):
     t=str(tot)
     r=str(rimasti)
@@ -1146,26 +1393,91 @@ def salvasuFile(tot,rimasti,port,dif,centr,att):
         fin.write(el)
         fin.write("\n")   
         input("Premere Invio per continuare ")
+      
+
+def aggiorna_rigoristi():
+    try:
         
-def main():
-    if not path.exists("./excel/calendario.xlsx") or not path.exists("./excel/classifica.xlsx") or not path.exists("./excel/giocatori.xlsx") or not path.exists("./excel/Quotazioni_Fantacalcio.xlsx"):
-        print("Generazione dei file excel in corso attendere...")
-        ris=genera_excel()
-        if ris!="OK":
-            print("Errore imprevisto, termino.")
-            exit()
+        l=rigoristi()
+        if len(l)==0:
+            return 1
+        f=open("./src/rigoristi.txt","w")
+        for el in l:
+            f.write(el.upper())
+            f.write("\n")
+        f.close()
+        return 0
+    except:
+        return 1
+    
+def readCredito():
     with open("./src/crediti.txt", "r") as fin:
-        linee=fin.readlines()
+            linee=fin.readlines()
     budget_tot=linee[0].split("=")[1].split("\n")[0]
     crediti_rimasti=linee[1].split("=")[1].split("\n")[0]
     budg_portieri=linee[2].split("=")[1].split("\n")[0]
     budg_dif=linee[3].split("=")[1].split("\n")[0]
     budg_centr=linee[4].split("=")[1].split("\n")[0]
-    budg_att=linee[5].split("=")[1].split("\n")[0]
-    w_d=open("./src/difensori.txt", "w")
-    w_c=open("./src/centrocampisti.txt", "w")
-    w_a=open("./src/attaccanti.txt", "w")
+    budg_att=linee[5].split("=")[1].split("\n")[0]    
+    return budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att
+def main():
+    
+    os.system('CLS')
+    os.system('color')
+    f = Figlet(font='slant')
+    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+
+    print("Generazione file di sistema in corso, attendere...")
+    try:
+        w_p=open("./src/portieri.txt", "w")
+        w_d=open("./src/difensori.txt", "w")
+        w_c=open("./src/centrocampisti.txt", "w")
+        w_a=open("./src/attaccanti.txt", "w")
+        w_p.close()    
+        w_d.close()
+        w_c.close()
+        w_a.close()
+    except:
+        print(colored("Errore nella generazione dei file di sistema, esco.",'red'))
+        exit()
+        
+    print(colored("Generazione file di sistema completata.",'green'))
+
+    print("Lettura dei crediti disponibili...")
+    budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
+    print(colored("Lettura dei crediti disponibili completata",'green'))
+
+    
+    print("Aggiornamento listone...")
+    r=calcola_quotazioni()
+    if r==0:
+        print(colored("Aggiornamento listone completato.",'green'))
+    else:
+        print(colored("Errore nell'aggiornamento del listone.",'red'))
+    print("Aggiornamento rigoristi...")
+    r=aggiorna_rigoristi()
+    if r==0:
+        print(colored("Aggiornamento rigoristi completato.",'green'))
+    else:
+        print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+        
+    print("Aggiornamento classifica...")
+    r=calcola_classifica()
+    if r==0:
+        print(colored("Aggiornamento classifica completato.",'green'))
+    else:
+        print(colored("Errore nell'aggiornamento della classifica.",'red'))
+        
+        
+   
+    if not path.exists("./excel/calendario.xlsx") or not path.exists("./excel/giocatori.xlsx") or not path.exists("./excel/Quotazioni_Fantacalcio.xlsx") or not path.exists("./excel/classifica.xlsx"):
+        ris=genera_excel()
+        if ris!="OK":
+            print(colored("Errore imprevisto, termino.",'red'))
+            exit()
+    print(colored("I file sono a posto.",'green'))
     while(True):
+        
         print("1) Genera portieri")
         print("2) Genera difensori")
         print("3) Genera centrocampisti")
@@ -1176,19 +1488,66 @@ def main():
         scelta=input()
         if scelta!="1" and scelta!="2" and scelta!="3" and scelta!="4":
             print("Inserire una scelta valida.")
+            input("Premere invio per continuare")
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             continue
         if scelta=="1":
-            p(int(budget_tot),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
+            w_p=open("./src/portieri.txt", "r") 
+            linee=w_p.readlines()
+            w_p.close()
+            if len(linee)==3:
+                print(colored("Portieri già presenti.",'red'))
+                input("Premere invio per continuare")
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                continue
             os.system('CLS')
+            p(int(budget_tot),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
+            
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="2":
+            budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
+            w_d=open("./src/difensori.txt", "r") 
+            linee=w_d.readlines()
+            w_d.close()
+            if len(linee)==8:
+                print(colored("Difensori già presenti.",'red'))
+                input("Premere invio per continuare")
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                continue
             d(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="3":
+            budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
+            w_c=open("./src/centrocampisti.txt", "r") 
+            linee=w_c.readlines()
+            w_c.close()
+            if len(linee)==8:
+                print(colored("Centrocampisti già presenti.",'red'))
+                input("Premere invio per continuare")
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                continue        
             c(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             os.system('CLS')
         elif scelta=="4":
+            budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
+            w_a=open("./src/attaccanti.txt", "r") 
+            linee=w_a.readlines()
+            w_a.close()
+            if len(linee)==6:
+                print(colored("Attaccanti già presenti, hai già completato il fanta.",'red'))
+                input("Premere invio per continuare")
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                continue
             a(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
 if __name__ == "__main__":
     main()
 
