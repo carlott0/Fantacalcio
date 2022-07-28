@@ -15,14 +15,251 @@ from tabulate import tabulate
 from termcolor import colored
 import requests
 from pyfiglet import Figlet
+import json
+
+def pertit():
+    session = HTMLSession()
+    session.headers.update({
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                'Connection':'close'
+    })
+    l="https://www.fantacalcio.it/probabili-formazioni-serie-a"
+    r=session.get(l)
+    soup= BeautifulSoup(r.content, "html.parser")  
+    session.close()
+    
+    l=soup.find_all("ul",{"class":"player-list starters"})
+    titolari={}
+    for el in l:
+        giocatori=el.find_all("a",{"class":"player-name player-link"})
+        progress=el.find_all("div",{"class":"progress-value"})
+        gtemp=[]
+        ptemp=[]
+        for g in giocatori:
+            gtemp.append(g.text.strip().upper())
+        for p in progress:
+            ptemp.append(p.text.strip().upper())
+        i=0
+        for i in range(0,len(gtemp)):
+            titolari[gtemp[i]]=ptemp[i]
+    l2=soup.find_all("ul",{"class":"player-list reserves"})
+    riserve={}
+    for el in l2:
+        giocatori=el.find_all("a",{"class":"player-name player-link"})
+        progress=el.find_all("div",{"class":"progress-value"})
+        gtemp=[]
+        ptemp=[]
+        for g in giocatori:
+            gtemp.append(g.text.strip().upper())
+        for p in progress:
+            ptemp.append(p.text.strip().upper())
+        i=0
+        for i in range(0,len(gtemp)):
+            riserve[gtemp[i]]=ptemp[i]
+        
+    if not path.exists("./indice/"):
+        os.makedirs("./indice/")
+    with open("./indice/titolari.txt","w") as w:
+        for el in titolari.keys():
+            b=el+":"+titolari[el]
+            w.write(b)
+            w.write("\n")
+    w.close()
+    with open("./indice/riserve.txt","w") as w:
+        for el in riserve.keys():
+            b=el+":"+riserve[el]
+            w.write(b)
+            w.write("\n")
+    w.close()
+
+def lista_portieri():
+    try:
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
+        })
+        l="https://sosfanta.calciomercato.com/portieri-ecco-la-guida-allasta-fascia-per-fascia-su-chi-puntare-dai-top-fino-ai-low-cost/"
+        r=session.get(l)
+        soup= BeautifulSoup(r.content, "html.parser")  
+        session.close()
+        cat={}
+        g=""
+        l=soup.find("div",{"class":"entry-content"}).find_all("p")
+        for el in l:
+            if "–" in el.text:
+                try:
+                    c=el.text.split("–")[0]
+
+                    g=el.text.split("–")[1].split("\n")[0]
+                    cat[c]=g
+                except:
+                    continue
+        fin=[]
+        dael=[]
+        for c in cat:
+            g=cat[c]
+            if not c.isupper():
+                dael.append(c)
+                continue
+            if "," not in g:
+                fin.append(g)
+                cat[c]=list(np.unique(fin))
+                fin=[]
+                continue
+            gx=g.split(",")
+            for el in gx:
+                if len(gx)<2:
+                    continue
+                for e in gx:
+                    fin.append(e)
+            cat[c]=list(np.unique(fin))
+            fin=[]
+        for el in dael:
+            del cat[el]
+
+        return cat
+    except:
+        return {}
+def lista_difensori():
+    try:
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
+        })
+        l="https://sosfanta.calciomercato.com/difensori-ecco-la-guida-allasta-chi-prendere-al-fantacalcio-la-divisione-in-fasce/"
+        r=session.get(l)
+        soup= BeautifulSoup(r.content, "html.parser")  
+        session.close()
+        cat={}
+        g=""
+        l=soup.find("div",{"class":"entry-content"}).find_all("p")
+        for el in l:
+            if "–" in el.text:
+                try:
+                    c=el.text.split("–")[0]
+
+                    g=el.text.split("–")[1].split("\n")[0]
+                    cat[c]=g
+                except:
+                    continue
+        fin=[]
+        dael=[]
+        for c in cat:
+            g=cat[c]
+            if not c.isupper():
+                dael.append(c)
+                continue
+            if "," not in g:
+                fin.append(g)
+                cat[c]=list(np.unique(fin))
+                fin=[]
+                continue
+            gx=g.split(",")
+            for el in gx:
+                if len(gx)<2:
+                    continue
+                for e in gx:
+                    fin.append(e)
+            cat[c]=list(np.unique(fin))
+            fin=[]
+        for el in dael:
+            del cat[el]
+        return cat
+    except:
+        return {}
+def lista_centrocampisti():
+    try:
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+        })
+        l="https://sosfanta.calciomercato.com/guida-asta-fantacalcio-2021-2022-chi-prendere/3"
+        r=session.get(l)
+        soup= BeautifulSoup(r.content, "html.parser")  
+        session.close()
+        cat={}
+        g=""
+        l=soup.find("div",{"id":"acp_content"}).find_all("p")
+        for el in l:
+            if "– " in el.text:
+                try:
+                    c=el.text.split("– ")[0]
+                
+                    g=(str(el).split("– ")[1].split("<")[0])
+                    cat[c]=g
+                except:
+                    continue
+        fin=[]
+        dael=[]
+        for c in cat:
+            g=cat[c]
+            if not c.isupper():
+                dael.append(c)
+                continue
+            gx=g.split(",")
+            for el in gx:
+                if len(gx)<2:
+                    continue
+                for e in gx:
+                    fin.append(e)
+            cat[c]=list(np.unique(fin))
+            fin=[]
+        for el in dael:
+            del cat[el]
+        return cat
+    except:
+        return {}
+def lista_attaccanti():
+    try:
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+        })
+        l="https://sosfanta.calciomercato.com/guida-asta-fantacalcio-2021-2022-chi-prendere/4"
+        r=session.get(l)
+        soup= BeautifulSoup(r.content, "html.parser")
+        cat={}
+        g=""
+        l=soup.find("div",{"id":"acp_content"}).find_all("p")
+        for el in l:
+            if "– " in el.text:
+                try:
+                    c=el.text.split("– ")[0]
+                
+                    g=(str(el).split("– ")[1].split("<")[0])
+                    cat[c]=g
+                except:
+                    continue
+        fin=[]
+        dael=[]
+        for c in cat:
+            g=cat[c]
+            if not c.isupper():
+                dael.append(c)
+                continue
+            gx=g.split(",")
+            for el in gx:
+                if len(gx)<2:
+                    continue
+                for e in gx:
+                    fin.append(e)
+            cat[c]=list(np.unique(fin))
+            fin=[]
+        for el in dael:
+            del cat[el]
+        return cat
+    except:
+        return {}
 
 def rigoristi():
-
     try:
         link="https://www.fantamaster.it/rigoristi-tiratori-seriea-2022-2023-consigli-fantacalcio/"
         session = HTMLSession()
         session.headers.update({
-                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
         })
         r=session.get(link)
         soup= BeautifulSoup(r.content, "html.parser")
@@ -38,6 +275,7 @@ def rigoristi():
         return lista
     except:
         return []
+       
 
 def calcola_calendario():
     #hanno disabilitato il sito, usare l'excel fornito da me o inserire a mano
@@ -346,17 +584,19 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     t=x.loc[(x['R']=='D')]       
     a,b,c = np.polyfit(x1, y1, 2)
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].item())
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
     except:
         return 1,0,[]
     prezzo_probabile=a*p*p+b*p+c
+    if prezzo_probabile <=0:
+        prezzo_probabile=1    
     try:
         gf=(t[t['Nome'].str.contains(giocatore_chiamato.upper())]['Gf'].values[0])
     except:
         gf=0        
     print("Gol scorsa stagione:",gf)
-    print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",int(prezzo_probabile))
+    #print("Prezzo di valore:",p)
+    #print("Prezzo probabile d'asta:",int(prezzo_probabile))
     difensori=quotazioni.loc[(quotazioni['R'] == 'D')]
     ds=list(quotazioni.loc[(quotazioni['R'] == 'D')].sort_values(by='Qt. A')['Nome'].values)
     squadre=[]
@@ -364,22 +604,42 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     valore=0
     if len(acquistati)!=0:
         for g in acquistati:
-            squadre.append(difensori[difensori['Nome'].str.contains(g.upper())]['Squadra'].item())
-            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].item())
+            squadre.append(difensori[difensori['Nome'].str.contains(g.upper())]['Squadra'].values[0])
+            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-    print("Valore Reparto attuale:",valore)
+   #print("Valore Reparto attuale:",valore)
     if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
         ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             d=random.choice(ds)
             if d.upper() not in acquistati and d.upper() not in giachiamati:
                 acquistati.append(d)
+                trovato=0
                 try:
-                    tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                    with open("./indice/titolari.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for el in l:
+                        if d in el:
+                            tit=el.split(":")[1].replace("%","")
+                            trovato=1
+                            break
+                    if trovato==0:
+                        with open("./indice/riserve.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if d in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                    if trovato==0:
+                        tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                        tit=round(round(int(tit)/38,2)*100,2)
                 except:
                     tit=1  
                 try:
-                    v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].item())
+                    v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].values[0])
                 except:
                     v=1
                 budget_rimasto=budget_rimasto-v
@@ -392,13 +652,32 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
         if d.upper() in acquistati or d.upper() in giachiamati:
             continue
         try:
-            tit=int(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+            with open("./indice/titolari.txt","r") as r:
+                l=r.readlines()
+            r.close()
+            for el in l:
+                if d in el:
+                    tit=el.split(":")[1].replace("%","")
+                    trovato=1
+                    break
+            if trovato==0:
+                with open("./indice/riserve.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                for el in l:
+                    if d in el:
+                        tit=el.split(":")[1].replace("%","")
+                        trovato=1
+                        break
+            if trovato==0:
+                tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0]) 
+                tit=round(round(int(tit)/38,2)*100,2)
         except:
             tit=0
         if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'])>1:#serve per problemi col excel
                 continue
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].item())
+            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].values[0])
         except:
             v=1
         if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
@@ -430,7 +709,26 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
-                            tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if d in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if d in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)
                         except:
                             tit=1
                         titolarieta=int(tit)
@@ -526,6 +824,7 @@ def difensori(u,budget):
             input("Premere Invio per continuare ")
             acquistati=[]
             continue
+        
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
@@ -539,6 +838,8 @@ def difensori(u,budget):
         ptpr=0
         prt=0
         xxx=0
+        tit=0
+        px=0
         for el in acquistati:
             if el in reparto_finale.keys():
                 p=int(reparto_finale[el])
@@ -551,31 +852,63 @@ def difensori(u,budget):
                 prezzo_probabile=a*p*p+b*p+c
             ptpr+=p
             prt+=prezzo_probabile
+            
+            
+            ###cat###
+            with open("./categorie/difensori.json","r") as r:
+                data = json.load(r)
+            r.close()
+            cat="-"
+            trovato=0
+            for categoria in data.keys():
+                if el.upper() in str(data[categoria]).upper():
+                    cat=categoria
+                if trovato==1:
+                    break
+               
+            ####
+            
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
                 gf=0
-            
             try:
-                tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
-                xxx+=round(round(int(tit)/38,2)*100,2)
+                with open("./indice/titolari.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                for s in l:
+                    if el in s:
+                        tit=s.split(":")[1].replace("%","")
+                        trovato=1
+                        break
+                if trovato==0:
+                    with open("./indice/riserve.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for s in l:
+                        if el in s:
+                            tit=s.split(":")[1].replace("%","")
+                            trovato=1
+                            break
+                xxx+=int(tit)
             except:
                 tit=0
             try:    
                 s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
             except:
                 s=""
+                
             if el.upper() == giocatore.upper():
-                tx=round(round(int(tit)/38,2)*100,2)
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+                tx=int(tit)#round(round(int(tit)/38,2)*100,2)
+                px=prezzo_probabile
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
         lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
         prezzo=int(prezzo)    
-        
-        lista_print.append(["Indice titolarietà medio squadra:",str(round(xxx/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        lista_print.append(["Indice titolarietà medio squadra:",str(int(xxx)/len(acquistati))+"%","","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria"]))
         lista_print.clear()
 
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
@@ -587,12 +920,12 @@ def difensori(u,budget):
         else:
             print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
-        if prezzo>budget-(8-len(new_acquisti)) or int(a*prezzo*prezzo+b*prezzo+c)>budget:
-            print(colored(("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c)),'yellow'))
+        if prezzo>budget-(8-len(new_acquisti)) or int(px)>budget:
+            print(colored(("Mmm, costa tanto, circa ",int(px)),'yellow'))
 
         elif valore_temp > valore_prima and tx>55:
-            print(colored(("Si acquistalo ma al massimo spendi:",prezzo),'green'))
-            print("Probabile prezzo d'asta: circa",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+            print("Probabile prezzo d'asta: circa",int(px))
         else:
             print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
@@ -646,14 +979,14 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
         return 1,0,[]
     prezzo_probabile=a*p*p+b*p+c
     if prezzo_probabile <=0:
-        prezzo_probabile=1
+        prezzo_probabile=p
     try:
         gf=(t[t['Nome'].str.contains(giocatore_chiamato.upper())]['Gf'].values[0])
     except:
         gf=0        
     print("Gol scorsa stagione:",gf)
-    print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",int(prezzo_probabile))
+    #print("Prezzo di valore:",p)
+    #print("Prezzo probabile d'asta:",int(prezzo_probabile))
     centrocampisti=quotazioni.loc[(quotazioni['R'] == 'C')]
     cs=list(quotazioni.loc[(quotazioni['R'] == 'C')].sort_values(by='Qt. A', ascending=False)['Nome'].values)
     squadre=[]
@@ -664,22 +997,45 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
             squadre.append(centrocampisti[centrocampisti['Nome'].str.contains(g.upper())]['Squadra'].values[0])
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-    print("Valore Reparto attuale:",valore)
+    #print("Valore Reparto attuale:",valore)
     if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
         cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             cx=random.choice(cs)
             if cx.upper() not in acquistati and cx.upper() not in giachiamati:
                 acquistati.append(cx)
+                ##
+                trovato=0
+                try:
+                    with open("./indice/titolari.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for el in l:
+                        if cx in el:
+                            tit=el.split(":")[1].replace("%","")
+                            trovato=1
+                            break
+                    if trovato==0:
+                        with open("./indice/riserve.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if cx in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                    if trovato==0:
+                        tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                        tit=round(round(int(tit)/38,2)*100,2)
+                except:
+                    tit=1                  
+                ##
                 try:
                     v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].values[0])
                 except:
                     v=1
                 budget_rimasto=budget_rimasto-v
-                try:
-                    tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
-                except:
-                    tit=1
+
                 titolarieta=int(tit)
                 tit_risultato.append(titolarieta)
                 k+=1
@@ -689,9 +1045,28 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
         if cx.upper() in acquistati or cx.upper() in giachiamati:
             continue
         try:
-            tit=int(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+            with open("./indice/titolari.txt","r") as r:
+                l=r.readlines()
+            r.close()
+            for el in l:
+                if cx in el:
+                    tit=el.split(":")[1].replace("%","")
+                    trovato=1
+                    break
+            if trovato==0:
+                with open("./indice/riserve.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                for el in l:
+                    if cx in el:
+                        tit=el.split(":")[1].replace("%","")
+                        trovato=1
+                        break
+            if trovato==0:
+                tit=int(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                tit=round(round(int(tit)/38,2)*100,2)
         except:
-            tit=0            
+            tit=0          
         if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'])>1:
             continue
         try:
@@ -714,7 +1089,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
                 prezzo=budget_rimasto-new_budg
                 budget_rimasto=new_budg
                 tit_risultato.append(titolarieta)
-                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A'])< 5)]['Nome'].values)
+                cs=list(quotazioni.loc[(quotazioni['R'] == 'C')]['Nome'].values)#& ((quotazioni['Qt. A'])< 5)
                 if cx in cs:
                     cs.remove(cx)
             if budget_rimasto <= da_comprare:
@@ -726,10 +1101,31 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
                         acquistati.append(cx)
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
+                        ##
                         try:
-                            tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if cx in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if cx in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)
                         except:
                             tit=1
+                        ##
                         titolarieta=int(tit)
                         tit_risultato.append(titolarieta)
                         k+=1
@@ -830,6 +1226,9 @@ def centrocampisti(u,budget):
         lista_print=[[]]
         ptpr=0
         prt=0
+        xxx=0
+        tit=0
+        px=0
         for el in acquistati:
             if el in reparto_finale.keys():
                 p=int(reparto_finale[el])
@@ -844,13 +1243,44 @@ def centrocampisti(u,budget):
                 prezzo_probabile=1
             ptpr+=p
             prt+=prezzo_probabile
-            
+            with open("./categorie/centrocampisti.json","r") as r:
+                data = json.load(r)
+            r.close()
+            cat="-"
+            for categoria in data.keys():
+                if el.upper() in str(data[categoria]).upper() :
+                    cat=categoria
+                    break
+                for d in data[categoria]:
+                    if el.upper() in d.upper() or d.upper() in el.upper() :
+                        cat=categoria
+                        break
+                          
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
                 gf=0
             try:
-                tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
+                with open("./indice/titolari.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                trovato=0
+                for s in l:
+                    if el in s:
+                        tit=int(s.split(":")[1].replace("%",""))
+                        trovato=1
+                        break
+                
+                if trovato==0:
+                    with open("./indice/riserve.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for s in l:
+                        if el in s:
+                            tit=int(s.split(":")[1].replace("%",""))
+                            trovato=1
+                            break
+                xxx+=int(tit)
             except:
                 tit=0
             try:    
@@ -858,19 +1288,18 @@ def centrocampisti(u,budget):
             except:
                 s=""                
             if el.upper() == giocatore.upper():
-                    tx=round(round(int(tit)/38,2)*100,2)
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+                    tx=int(tit)
+                    px=prezzo_probabile
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
         lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","",""])
         prezzo=int(prezzo)    
-        tit=0
-        for el in tit_risultato:
-            tit+=round(round(int(el)/38,2)*100,2)
+ 
         
-        lista_print.append(["Indice titolarietà medio reparto:",str(round(tit/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","",""])
+        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
         if int((valore_temp-valore_prima)*100) >150:
@@ -881,11 +1310,11 @@ def centrocampisti(u,budget):
         else:
             print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
-        if prezzo>budget-(8-len(new_acquisti)) or int(a*prezzo*prezzo+b*prezzo+c)>budget:
-            print(colored(("Mmm, costa tanto, circa ",int(a*prezzo*prezzo+b*prezzo+c)),'yellow'))
+        if prezzo>budget-(8-len(new_acquisti)) or px>budget:
+            print(colored(("Mmm, costa tanto, circa ",int(px)),'yellow'))
         elif valore_temp > valore_prima and tx > 55:
-            print(colored(("Si acquistalo ma al massimo spendi:",int(a*prezzo*prezzo+b*prezzo+c)),'green'))
-            print("Probabile prezzo d'asta: circa",int(a*prezzo*prezzo+b*prezzo+c))
+            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+            print("Probabile prezzo d'asta: circa",int(px))
         else:
             print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
@@ -950,8 +1379,8 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
         
     prezzo_ritorno=int(prezzo_probabile)
     print("Gol scorsa stagione:",gf)
-    print("Prezzo di valore:",p)
-    print("Prezzo probabile d'asta:",int(prezzo_probabile))
+    #print("Prezzo di valore:",p)
+    #print("Prezzo probabile d'asta:",int(prezzo_probabile))
     attaccanti=quotazioni.loc[(quotazioni['R'] == 'A')]
     ass=list(quotazioni.loc[(quotazioni['R'] == 'A')].sort_values(by='Qt. A', ascending=False)['Nome'].values)
     squadre=[]
@@ -962,7 +1391,7 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
             squadre.append(attaccanti[attaccanti['Nome'].str.contains(g.upper())]['Squadra'].values[0])
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-    print("Valore reparto attuale:",valore)
+    #print("Valore reparto attuale:",valore)
     if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
         ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
@@ -972,7 +1401,26 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 prezzo=1
                 budget_rimasto=budget_rimasto-1
                 try:
-                    tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                    with open("./indice/titolari.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for el in l:
+                        if ax in el:
+                            tit=el.split(":")[1].replace("%","")
+                            trovato=1
+                            break
+                    if trovato==0:
+                        with open("./indice/riserve.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if ax in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                    if trovato==0:
+                        tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                        tit=round(round(int(tit)/38,2)*100,2)
                 except:
                     tit=1
                 titolarieta=int(tit)
@@ -992,11 +1440,28 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
         if ax.upper() in acquistati or ax.upper() in giachiamati:
             continue
         try:
-            tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+            with open("./indice/titolari.txt","r") as r:
+                l=r.readlines()
+            r.close()
+            for el in l:
+                if ax in el:
+                    tit=el.split(":")[1].replace("%","")
+                    trovato=1
+                    break
+            if trovato==0:
+                with open("./indice/riserve.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                for el in l:
+                    if ax in el:
+                        tit=el.split(":")[1].replace("%","")
+                        trovato=1
+                        break
+            if trovato==0:
+                tit=round(round(int(tit)/38,2)*100,2)
+                tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
         except:
             tit=0
-        #if len(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'])>1:#serve per problemi col excel            
-        #    tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
         try:
             v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].values[0])
         except:
@@ -1023,11 +1488,11 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 prezzo=budget_rimasto-new_budg
                 budget_rimasto=new_budg
                 tit_risultato.append(titolarieta)                
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & ((quotazioni['Qt. A'])<= 5)]['Nome'].values)
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A')& (quotazioni['Qt. A'] < budget_rimasto )]['Nome'].values)#& ((quotazioni['Qt. A'])<= 5)
                 if ax in ass:
                     ass.remove(ax)
             if budget_rimasto <= da_comprare:
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < new_budg)]['Nome'].values)
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < budget_rimasto)]['Nome'].values)
                 k=0
                 while(k<da_comprare):
                     ax=random.choice(ass)
@@ -1036,7 +1501,26 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
-                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if ax in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if ax in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)                                
                         except:
                             tit=1
                         titolarieta=int(tit)
@@ -1058,7 +1542,26 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                         prezzo=1
                         budget_rimasto=budget_rimasto-1
                         try:
-                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if d in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if d in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)
                         except:
                             tit=1
                         titolarieta=int(tit)
@@ -1158,7 +1661,10 @@ def attaccanti(u,budget):
         lista_print=[[]]
         ptpr=0
         prt=0
+        xxx=0
+        px=0
         for el in acquistati:
+            tit=0
             if el in reparto_finale.keys():
                 p=int(reparto_finale[el])
                 prezzo_probabile=p
@@ -1172,12 +1678,37 @@ def attaccanti(u,budget):
                 prezzo_probabile=1
             ptpr+=p
             prt+=prezzo_probabile
+            with open("./categorie/attaccanti.json","r") as r:
+                data = json.load(r)
+            r.close()
+            cat="-"
+            for categoria in data.keys():
+                if el.upper() in str(data[categoria]).upper():
+                    cat=categoria
+                    break
+              
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
                 gf=0
             try:
-                tit=int(t[t['Nome'].str.contains(el.upper())]['Pg'].values[0])
+                with open("./indice/titolari.txt","r") as r:
+                    l=r.readlines()
+                r.close()
+                for s in l:
+                    if el.upper() in s.upper():
+                        tit=int(s.split(":")[1].replace("%",""))
+                        trovato=1
+                        break
+                if trovato==0:
+                    with open("./indice/riserve.txt","r") as r:
+                        l=r.readlines()
+                    r.close()
+                    for s in l:
+                        if el.upper() in s.upper():
+                            tit=int(s.split(":")[1].replace("%",""))
+                            break
+                xxx+=int(tit)
             except:
                 tit=0
             try:
@@ -1185,18 +1716,18 @@ def attaccanti(u,budget):
             except:
                 s=""
             if el.upper() == giocatore.upper():
-                tx=round(round(int(tit)/38,2)*100,2)
-                
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(round(round(int(tit)/38,2)*100,2))+"%"])
+                tx=int(tit)
+                px=prezzo_probabile
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
         lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","",""])
         prezzo=int(prezzo)    
         tit=0
         for el in tit_risultato:
             tit+=round(round(int(el)/38,2)*100,2)
-        lista_print.append(["Indice titolarietà medio reparto:",str(round(tit/8,2))+"%","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà"]))
+        lista_print.append(["Indice titolarietà medio reparto:",str(xxx/len(acquistati))+"%","","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
         if int((valore_temp-valore_prima)*100) >150:
@@ -1207,12 +1738,12 @@ def attaccanti(u,budget):
         else:
             print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
-        if prezzo>budget-(6-len(new_acquisti)) or pr>budget:
+        if prezzo>budget-(6-len(new_acquisti)) or int(px)>budget:
             print(colored(("Mmm, costa tanto, circa ",pr),'yellow'))
         elif valore_temp > valore_prima or tx > 50:
             
-            print(colored(("Si acquistalo ma al massimo spendi:",pr),'green'))
-            print("Probabile prezzo d'asta: circa",pr)
+            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+            print("Probabile prezzo d'asta: circa",int(px))
         else:
             print(colored("Non acquistarlo.",'red'))
         valore_reparto=0
@@ -1420,6 +1951,32 @@ def readCredito():
     budg_centr=linee[4].split("=")[1].split("\n")[0]
     budg_att=linee[5].split("=")[1].split("\n")[0]    
     return budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att
+    
+def generaCategorie():
+    
+    p=lista_portieri()
+
+    with open("./categorie/portieri.txt","w") as w:
+        w.write(str(p))
+    w.close()
+    
+    d=lista_difensori()
+
+    with open("./categorie/difensori.json","w") as w:
+        json.dump(d, w, indent=4)
+    w.close()
+    
+    c=lista_centrocampisti()
+    with open("./categorie/centrocampisti.json","w") as w:
+        json.dump(c, w, indent=4)
+    w.close()    
+    
+    a=lista_attaccanti()
+    with open("./categorie/attaccanti.json","w") as w:
+        json.dump(a, w, indent=4)
+    w.close()
+    
+
 def main():
     
     os.system('CLS')
@@ -1429,6 +1986,10 @@ def main():
 
     print("Generazione file di sistema in corso, attendere...")
     try:
+        if not path.exists("./src/"):
+            os.makedirs("./src/")
+        if not path.exists("./categorie/"):
+            os.makedirs("./categorie/")
         w_p=open("./src/portieri.txt", "w")
         w_d=open("./src/difensori.txt", "w")
         w_c=open("./src/centrocampisti.txt", "w")
@@ -1437,38 +1998,154 @@ def main():
         w_d.close()
         w_c.close()
         w_a.close()
+        generaCategorie()
+        pertit()
     except:
+        os.system('CLS')
+        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         print(colored("Errore nella generazione dei file di sistema, esco.",'red'))
         exit()
-        
+    os.system('CLS')
+    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
     print(colored("Generazione file di sistema completata.",'green'))
-
     print("Lettura dei crediti disponibili...")
     budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
-    print(colored("Lettura dei crediti disponibili completata",'green'))
-
     
+    
+    os.system('CLS')
+    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    print(colored("Generazione file di sistema completata.",'green'))
+    print(colored("Lettura dei crediti disponibili completata",'green'))
     print("Aggiornamento listone...")
     r=calcola_quotazioni()
+    ok=0
+    ok2=0
     if r==0:
+        os.system('CLS')
+        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        print(colored("Generazione file di sistema completata.",'green'))
+        print(colored("Lettura dei crediti disponibili completata",'green'))
         print(colored("Aggiornamento listone completato.",'green'))
     else:
+        os.system('CLS')
+        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        print(colored("Generazione file di sistema completata.",'green'))
+        print(colored("Lettura dei crediti disponibili completata",'green'))    
         print(colored("Errore nell'aggiornamento del listone.",'red'))
+        ok=1
+        
+        
     print("Aggiornamento rigoristi...")
     r=aggiorna_rigoristi()
     if r==0:
-        print(colored("Aggiornamento rigoristi completato.",'green'))
+        if ok==0:
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            print(colored("Generazione file di sistema completata.",'green'))
+            print(colored("Lettura dei crediti disponibili completata",'green'))
+            print(colored("Aggiornamento listone completato.",'green'))
+            print(colored("Aggiornamento rigoristi completato.",'green'))
+        else:
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            print(colored("Generazione file di sistema completata.",'green'))
+            print(colored("Lettura dei crediti disponibili completata",'green'))
+            print(colored("Errore nell'aggiornamento del listone.",'red'))
     else:
-        print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+        if ok==0:
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            print(colored("Generazione file di sistema completata.",'green'))
+            print(colored("Lettura dei crediti disponibili completata",'green'))
+            print(colored("Aggiornamento listone completato.",'green'))
+            print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+            ok2=1
+        else:
+            os.system('CLS')
+            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            print(colored("Generazione file di sistema completata.",'green'))
+            print(colored("Lettura dei crediti disponibili completata",'green'))
+            print(colored("Errore nell'aggiornamento del listone.",'red'))    
+            print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+            ok2=1
         
     print("Aggiornamento classifica...")
     r=calcola_classifica()
     if r==0:
-        print(colored("Aggiornamento classifica completato.",'green'))
+        if ok==0:
+            if ok2==0:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Aggiornamento listone completato.",'green'))
+                print(colored("Aggiornamento rigoristi completato.",'green'))
+                print(colored("Aggiornamento classifica completato.",'green'))
+            else:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Aggiornamento listone completato.",'green'))
+                print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+                print(colored("Aggiornamento classifica completato.",'green'))                
+        else:
+            if ok2==0:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Errore nell'aggiornamento del listone.",'red'))
+                print(colored("Aggiornamento rigoristi completato.",'green'))
+                print(colored("Aggiornamento classifica completato.",'green'))   
+            else:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Errore nell'aggiornamento del listone.",'red'))
+                print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+                print(colored("Aggiornamento classifica completato.",'green'))           
+                
     else:
-        print(colored("Errore nell'aggiornamento della classifica.",'red'))
-        
-        
+        if ok==0:
+            if ok2==0:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Aggiornamento listone completato.",'green'))
+                print(colored("Aggiornamento rigoristi completato.",'green'))
+                print(colored("Errore nell'aggiornamento della classifica.",'red'))
+            else:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Aggiornamento listone completato.",'green'))
+                print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+                print(colored("Errore nell'aggiornamento della classifica.",'red'))               
+        else:
+            if ok2==0:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Errore nell'aggiornamento del listone.",'red'))
+                print(colored("Aggiornamento rigoristi completato.",'green'))
+                print(colored("Errore nell'aggiornamento della classifica.",'red'))   
+            else:
+                os.system('CLS')
+                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                print(colored("Generazione file di sistema completata.",'green'))
+                print(colored("Lettura dei crediti disponibili completata",'green'))
+                print(colored("Errore nell'aggiornamento del listone.",'red'))
+                print(colored("Errore nell'aggiornamento dei rigoristi.",'red'))
+                print(colored("Errore nell'aggiornamento della classifica.",'red'))
+
+
+
+ 
    
     if not path.exists("./excel/calendario.xlsx") or not path.exists("./excel/giocatori.xlsx") or not path.exists("./excel/Quotazioni_Fantacalcio.xlsx") or not path.exists("./excel/classifica.xlsx"):
         ris=genera_excel()
