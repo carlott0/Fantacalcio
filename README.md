@@ -27,6 +27,10 @@ La cartella old contiene gli excel con i valori del mio fanta della scorsa asta,
 
 Per ogni giocatore che viene chiamato si consiglia di inserire il prezzo a cui viene venduto, anche se non lo abbiamo comprato, poiché i valori vengono usati per determinare meglio il prezzo probabile dei prossimi giocatori (es. se durante l'asta i giocatori vanno via a poco, il sistema abbassa i prezzi probabili).  
 
+La cartella indice viene caricata dinamicamente all'inizio e contiene l'indice di titolarietà dei giocatori.
+
+La cartella categorie contiene le fasce in cui ogni giocatore si trova (manca da aggiornare gli attaccanti).
+
 Ho vinto 2 fantacalci di fila con questo metodo, il primo era un fanta a 12 il secondo fanta a 10.
 
 In realtà nell'ultimo fanta avevo speso 400 crediti su 500 (80%), ma la squadra non era equilibrata.
