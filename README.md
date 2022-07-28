@@ -21,14 +21,14 @@ Nel momento in cui sto testando il programma ottiene tali file autonomamente, ma
 
 ![test](https://user-images.githubusercontent.com/49305804/181594044-9a5dfc88-202c-44c3-8296-0f44b55f2f31.png)
 
-Ottimizzato per budget 500 crediti. Se si vogliono cambiare bisogna modificare il valore nel file crediti.txt, e inserire una diversa funzione prezzo all'interno del codice fantacalcio.py, poiché la previsione del prezzo sulla base della quotazione iniziale si basa su 500 crediti (esempio: immobile quotazione 40 il prezzo reale sarà sui 180 circa su 500, 250 sui 800 (?) e 350 sui 1000 (??)).
+Ottimizzato per budget 500 crediti. Se si vogliono cambiare bisogna modificare il valore nel file crediti.txt, e inserire una diversa funzione prezzo all'interno dei file xlsx della cartella '/Funzione Prezzo/', poiché la previsione del prezzo sulla base della quotazione iniziale si basa su 500 crediti (esempio: immobile quotazione 40 il prezzo reale sarà sui 180 circa su 500, 250 sui 800 (?) e 350 sui 1000 (??)).
 
 Nei file nella cartella src verranno salvati i giocatori comprati, nel file crediti.txt è possibile modificare i pesi di ogni ruolo, cioè i prezzi massimi che si vuole spendere per un reparto.
 A default i portieri su 500 crediti costano il 3%, ovvero 15 crediti, i difensori 35 su 500 (7%), i centrocampisti 100 su 500(20%), e gli attaccanti 350 su 500 (70%).
 
 Per avviare il programma eseguire il comando python3 fantacalcio.py e seguire le istruzioni che seguono di volta in volta. Il progamma ogni volta che viene chiamato un giocatore crea un possibile reparto e dice il prezzo probabile di quel giocatore, oltre a altri dati come i gol fatti l'anno precedente, l'indice di titolarietà e se si tratta di un rigorista.
 
-La cartella old contiene gli excel con i valori del mio fanta della scorsa asta, per ogni reparto contiene il prezzo di partenza e il prezzo a cui è andato ogni giocatore. Viene poi usato per migliorare la stima del prezzo dei giocatori di quest'anno.
+La cartella 'old lega' contiene gli excel con i valori del mio fanta della scorsa asta, per ogni reparto contiene il prezzo di partenza e il prezzo a cui è andato ogni giocatore. Viene poi usato per migliorare la stima del prezzo dei giocatori di quest'anno. Se non si vuole usare questa funzione cancellare semplicemente la cartella 'old lega'. 
 
 Per ogni giocatore che viene chiamato si consiglia di inserire il prezzo a cui viene venduto, anche se non lo abbiamo comprato, poiché i valori vengono usati per determinare meglio il prezzo probabile dei prossimi giocatori (es. se durante l'asta i giocatori vanno via a poco, il sistema abbassa i prezzi probabili).  
 
