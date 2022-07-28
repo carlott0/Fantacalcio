@@ -758,8 +758,13 @@ def difensori(u,budget):
     t=x.loc[(x['R']=='D')]       
     quotazioni=quotazioni.loc[(quotazioni['R']=='D')]     
     ### funzione prezzo
-    x1 = [1,5,10,15,20,25,30]
-    y1 = [1,10,15,20,30,40,50]
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/difensori.txt", names=['Valore Nominale','Prezzo Asta'])
+        x1=w['Valore Nominale']
+        y1=w['Prezzo Asta']
+    except:
+        x1 = [1,5,10,15,20,25,30]
+        y1 = [1,10,15,20,30,40,50]
     
     try:
         d=pd.read_excel("./old lega/dif.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
@@ -1151,9 +1156,13 @@ def centrocampisti(u,budget):
     t=x.loc[(x['R']=='C')]       
     quotazioni=quotazioni.loc[(quotazioni['R']=='C')]     
 
-    
-    x1 = [1,5,10,15,20,25,30,35]
-    y1 = [1,10,20,30,35,40,50,60]
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/centrocampisti.txt", names=['Valore Nominale','Prezzo Asta'])
+        x1=w['Valore Nominale']
+        y1=w['Prezzo Asta']
+    except:
+        x1 = [1,5,10,15,20,25,30,35]
+        y1 = [1,10,20,30,35,40,50,60]
     
     try:
         d=pd.read_excel("./old lega/centr.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
@@ -1586,8 +1595,14 @@ def attaccanti(u,budget):
     t=x.loc[(x['R']=='A')]
     quotazioni=quotazioni.loc[(quotazioni['R']=='A')]     
     
-    x1 = [1,5,10,15,20,25,30,35,40,45]
-    y1 = [1,10,30,40,50,70,110,140,160,200]
+    
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/attaccanti.txt", names=['Valore Nominale','Prezzo Asta'])
+        x1=w['Valore Nominale']
+        y1=w['Prezzo Asta']
+    except:
+        x1 = [1,5,10,15,20,25,30,35,40,45]
+        y1 = [1,10,30,40,50,70,110,140,160,200]
     
     try:
         d=pd.read_excel("./old lega/att.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
