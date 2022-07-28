@@ -1,6 +1,9 @@
 # Fantacalcio
 Assistente guida per l'asta iniziale del fantacalcio. 
 
+![image](https://user-images.githubusercontent.com/49305804/181594220-3f284deb-dfa2-4e1f-b953-54d10f2afd32.png)
+
+
 Requirements:
 
 Python3
@@ -15,6 +18,8 @@ In pratica per funzionare bisogna sapere il calendario, la classifica dell'anno 
 
 Nel momento in cui sto testando il programma ottiene tali file autonomamente, ma al momento del nuovo anno di fanta potrebbe esserci qualche problema, in caso importare a mano gli excel. 
 #EDIT Il download del calendario dà problemi, usare quello già a disposizione o inserire a mano.
+
+![test](https://user-images.githubusercontent.com/49305804/181594044-9a5dfc88-202c-44c3-8296-0f44b55f2f31.png)
 
 Ottimizzato per budget 500 crediti. Se si vogliono cambiare bisogna modificare il valore nel file crediti.txt, e inserire una diversa funzione prezzo all'interno del codice fantacalcio.py, poiché la previsione del prezzo sulla base della quotazione iniziale si basa su 500 crediti (esempio: immobile quotazione 40 il prezzo reale sarà sui 180 circa su 500, 250 sui 800 (?) e 350 sui 1000 (??)).
 
