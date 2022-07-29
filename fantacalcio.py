@@ -17,6 +17,43 @@ import requests
 from pyfiglet import Figlet
 import json
 
+def getInfortunati():
+    session = HTMLSession()
+    session.headers.update({
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                "Connection":"close"
+    })
+    l="https://sosfanta.calciomercato.com/tabella-indisponibili-tutti-gli-infortunati-e-i-tempi-di-recupero-verso-lasta-da-chiesa-a-lovato/"
+    r=session.get(l)
+    soup= BeautifulSoup(r.content, "html.parser")
+    infortunati=[]
+    squalificati=[]
+    for el in soup.find("div",{"class":"entry-content"}).find_all("strong"):
+        if el.text.isupper():
+            continue
+        if str(el).count("<")>2:
+            continue
+        if '"' in str(el):
+            continue
+        for c in el.text:
+            if c.strip().isupper() :
+                if "("  in el.text:
+                    squalificati.append(el.text.upper())
+                else:
+                    infortunati.append(el.text.upper())
+    if not path.exists("./infortunii/"):
+        os.makedirs("./infortunii/")
+    with open("./infortunii/infortunati.txt","w") as w:
+        for el in infortunati:
+            w.write(el)
+            w.write("\n")
+    w.close()
+    with open("./infortunii/squalificati.txt","w") as w:
+        for el in squalificati:
+            w.write(el)
+            w.write("\n")
+    w.close()    
+
 def pertit():
     session = HTMLSession()
     session.headers.update({
@@ -173,21 +210,22 @@ def lista_centrocampisti():
     try:
         session = HTMLSession()
         session.headers.update({
-                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
         })
-        l="https://sosfanta.calciomercato.com/guida-asta-fantacalcio-2021-2022-chi-prendere/3"
+        l="https://sosfanta.calciomercato.com/centrocampisti-ecco-la-guida-allasta-dai-top-fino-ai-low-cost-su-chi-puntare-al-fanta/"
         r=session.get(l)
         soup= BeautifulSoup(r.content, "html.parser")  
         session.close()
         cat={}
         g=""
-        l=soup.find("div",{"id":"acp_content"}).find_all("p")
+        l=soup.find("div",{"class":"entry-content"}).find_all("p")
         for el in l:
-            if "– " in el.text:
+            if "–" in el.text:
                 try:
-                    c=el.text.split("– ")[0]
-                
-                    g=(str(el).split("– ")[1].split("<")[0])
+                    c=el.text.split("–")[0]
+
+                    g=el.text.split("–")[1].split("\n")[0]
                     cat[c]=g
                 except:
                     continue
@@ -197,6 +235,11 @@ def lista_centrocampisti():
             g=cat[c]
             if not c.isupper():
                 dael.append(c)
+                continue
+            if "," not in g:
+                fin.append(g)
+                cat[c]=list(np.unique(fin))
+                fin=[]
                 continue
             gx=g.split(",")
             for el in gx:
@@ -845,6 +888,25 @@ def difensori(u,budget):
         xxx=0
         tit=0
         px=0
+        try:
+            with open("./categorie/difensori.json","r") as r:
+                data = json.load(r)
+            r.close() 
+        except:
+            data={}
+        try:
+            with open("./infortunii/infortunati.txt","r") as r:
+                infortunati=r.readlines()
+            r.close()
+        except:
+            infortunati=[]
+        try:
+            with open("./infortunii/squalificati.txt","r") as r:
+                squalificati=r.readlines()
+            r.close()
+        except:
+            squalificati=[]  
+            
         for el in acquistati:
             if el in reparto_finale.keys():
                 p=int(reparto_finale[el])
@@ -860,9 +922,7 @@ def difensori(u,budget):
             
             
             ###cat###
-            with open("./categorie/difensori.json","r") as r:
-                data = json.load(r)
-            r.close()
+
             cat="-"
             trovato=0
             for categoria in data.keys():
@@ -871,6 +931,17 @@ def difensori(u,budget):
                 if trovato==1:
                     break
                
+            ####
+ 
+            inf="-"
+            for e in infortunati:
+                if el.upper().strip() in e.strip() or e.strip() in el.upper().strip():
+                    inf="Sì"
+            squ="-"
+            for e in squalificati:
+                if el.upper().strip() in e.strip():
+                    squ=e.split("(")[1].split(")")[0]
+                    
             ####
             
             try:
@@ -906,14 +977,14 @@ def difensori(u,budget):
             if el.upper() == giocatore.upper():
                 tx=int(tit)#round(round(int(tit)/38,2)*100,2)
                 px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","",""])
+        lista_print.append(["","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","",""])
         prezzo=int(prezzo)    
-        lista_print.append(["Indice titolarietà medio squadra:",str(int(xxx)/len(acquistati))+"%","","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria"]))
+        lista_print.append(["Indice titolarietà medio squadra:",str(int(xxx)/len(acquistati))+"%","","","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
 
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
@@ -1179,6 +1250,25 @@ def centrocampisti(u,budget):
         f.close()
     except:
         pass
+        
+    try:
+        with open("./infortunii/infortunati.txt","r") as r:
+            infortunati=r.readlines()
+        r.close()
+    except:
+        infortunati=[]
+    try:
+        with open("./categorie/centrocampisti.json","r") as r:
+            data = json.load(r)
+        r.close()        
+    except:
+        data={}
+    try:
+        with open("./infortunii/squalificati.txt","r") as r:
+            squalificati=r.readlines()
+        r.close()
+    except:
+        squalificati=[]      
     while(i!=9):
         #input("Premere Invio per continuare ")
         a,b,c = np.polyfit(x1, y1, 2)
@@ -1252,9 +1342,7 @@ def centrocampisti(u,budget):
                 prezzo_probabile=1
             ptpr+=p
             prt+=prezzo_probabile
-            with open("./categorie/centrocampisti.json","r") as r:
-                data = json.load(r)
-            r.close()
+
             cat="-"
             for categoria in data.keys():
                 if el.upper() in str(data[categoria]).upper() :
@@ -1264,7 +1352,15 @@ def centrocampisti(u,budget):
                     if el.upper() in d.upper() or d.upper() in el.upper() :
                         cat=categoria
                         break
-                          
+            inf="-"
+            for e in infortunati:
+                if el.upper().strip() in e.strip() or e.strip() in el.upper().strip():
+                    inf="Sì"
+            squ="-"
+            for e in squalificati:
+                if el.upper().strip() in e.strip():
+                    squ=e.split("(")[1].split(")")[0]
+                                  
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
@@ -1299,16 +1395,16 @@ def centrocampisti(u,budget):
             if el.upper() == giocatore.upper():
                     tx=int(tit)
                     px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","",""])
+        lista_print.append(["","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","",""])
         prezzo=int(prezzo)    
  
         
-        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","",""])
-        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria"]))
+        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","","",""])
+        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
         if int((valore_temp-valore_prima)*100) >150:
@@ -1619,8 +1715,27 @@ def attaccanti(u,budget):
         f.close()
     except:
         pass
+    try:
+        with open("./infortunii/infortunati.txt","r") as r:
+            infortunati=r.readlines()
+        r.close()
+    except:
+        infortunati=[]
+    try:
+        with open("./infortunii/squalificati.txt","r") as r:
+            squalificati=r.readlines()
+        r.close()
+    except:
+        squalificati=[]     
+    try:
+        with open("./categorie/attaccanti.json","r") as r:
+            data = json.load(r)
+        r.close()
+    except:
+        data={}
         
-    
+
+
     while(i!=7):
         a,b,c = np.polyfit(x1, y1, 2)
         #input("Premere Invio per continuare ")
@@ -1701,7 +1816,15 @@ def attaccanti(u,budget):
                 if el.upper() in str(data[categoria]).upper():
                     cat=categoria
                     break
-              
+            inf="-"
+            for e in infortunati:
+                if el.upper().strip() in e.strip() or e.strip() in el.upper().strip():
+                    inf="Sì"
+            squ="-"
+            for e in squalificati:
+                if el.upper().strip() in e.strip():
+                    squ=e.split("(")[1].split(")")[0]
+                             
             try:
                 gf=(t[t['Nome'].str.contains(el.upper())]['Gf'].values[0])
             except:
@@ -1733,16 +1856,16 @@ def attaccanti(u,budget):
             if el.upper() == giocatore.upper():
                 tx=int(tit)
                 px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat])
-        lista_print.append(["","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","",""])
+            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
+        lista_print.append(["","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","","",""])
         prezzo=int(prezzo)    
         tit=0
         for el in tit_risultato:
             tit+=round(round(int(el)/38,2)*100,2)
-        lista_print.append(["Indice titolarietà medio reparto:",str(xxx/len(acquistati))+"%","","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria"]))
+        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx/len(acquistati)))+"%","","","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
         valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
         if int((valore_temp-valore_prima)*100) >150:
@@ -2013,8 +2136,10 @@ def main():
         w_d.close()
         w_c.close()
         w_a.close()
+        
         generaCategorie()
         pertit()
+        getInfortunati()
     except:
         os.system('CLS')
         print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
