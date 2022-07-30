@@ -255,23 +255,26 @@ def lista_centrocampisti():
     except:
         return {}
 def lista_attaccanti():
+
     try:
         session = HTMLSession()
         session.headers.update({
-                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
         })
-        l="https://sosfanta.calciomercato.com/guida-asta-fantacalcio-2021-2022-chi-prendere/4"
+        l="https://sosfanta.calciomercato.com/attaccanti-ecco-la-guida-allasta-chi-prendere-dai-top-player-fino-agli-ultimi-slot/"
         r=session.get(l)
-        soup= BeautifulSoup(r.content, "html.parser")
+        soup= BeautifulSoup(r.content, "html.parser")  
+        session.close()
         cat={}
         g=""
-        l=soup.find("div",{"id":"acp_content"}).find_all("p")
+        l=soup.find("div",{"class":"entry-content"}).find_all("p")
         for el in l:
-            if "– " in el.text:
+            if "–" in el.text:
                 try:
-                    c=el.text.split("– ")[0]
-                
-                    g=(str(el).split("– ")[1].split("<")[0])
+                    c=el.text.split("–")[0]
+
+                    g=el.text.split("–")[1].split("\n")[0]
                     cat[c]=g
                 except:
                     continue
@@ -281,6 +284,11 @@ def lista_attaccanti():
             g=cat[c]
             if not c.isupper():
                 dael.append(c)
+                continue
+            if "," not in g:
+                fin.append(g)
+                cat[c]=list(np.unique(fin))
+                fin=[]
                 continue
             gx=g.split(",")
             for el in gx:
@@ -295,7 +303,6 @@ def lista_attaccanti():
         return cat
     except:
         return {}
-
 def rigoristi():
     try:
         link="https://www.fantamaster.it/rigoristi-tiratori-seriea-2022-2023-consigli-fantacalcio/"
@@ -399,6 +406,64 @@ def calcola_classifica():
         return 0
     except:
         return 1
+        
+        
+def ottieniVal(ruoli,qa):
+
+    i=0
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/difensori.txt", names=['Valore Nominale','Prezzo Asta'])
+        d1=w['Valore Nominale']
+        d2=w['Prezzo Asta']
+    except:
+        d1 = [1,5,10,15,20,25,30]
+        d2 = [1,10,15,20,30,40,50]
+    
+    
+    
+    
+    
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/centrocampisti.txt", names=['Valore Nominale','Prezzo Asta'])
+        c1=w['Valore Nominale']
+        c2=w['Prezzo Asta']
+    except:
+        c1 = [1,5,10,15,20,25,30,35]
+        c2 = [1,10,20,30,35,40,50,60]
+        
+    
+    
+    
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/attaccanti.txt", names=['Valore Nominale','Prezzo Asta'])
+        a1=w['Valore Nominale']
+        a2=w['Prezzo Asta']
+    except:
+        a1 = [1,5,10,15,20,25,30,35,40,45]
+        a2 = [1,10,30,40,50,70,110,140,160,200]
+    
+
+    
+    
+    ris=[]
+    for el in ruoli:
+        p=int(qa[i])
+        if el=="D":
+            a,b,c = np.polyfit(d1, d2, 2)
+            prezzo_probabile=int(a*p*p+b*p+c)
+        elif el=="C":
+            a,b,c = np.polyfit(c1, c2, 2)
+            prezzo_probabile=int(a*p*p+b*p+c)
+        elif el=="A":
+            a,b,c = np.polyfit(a1, a2, 2)
+            prezzo_probabile=int(a*p*p+b*p+c)
+        else:
+            prezzo_probabile=p
+        ris.append(prezzo_probabile)
+        i+=1
+    return ris
+
+        
 def calcola_quotazioni():
     try:
         link="https://www.fantacalcio.it/api/v1/Excel/prices/17/1"
@@ -443,12 +508,12 @@ def calcola_quotazioni():
         new['Squadra']=data['Squadra']
         new['Qt. A']=data['Qt.A']
         new['Qt. I']=data['Qt.I']
-        new['Diff']=data['Diff.']
-
+        lista=ottieniVal(data['R'],data['Qt.A'])
+        new['VAL']= pd.Series(lista)
         new.to_excel('./excel/Quotazioni_Fantacalcio.xlsx')
         os.remove('./excel/q.xlsx')
         
-        
+            
         return 0
     except:
         return 1
@@ -617,20 +682,20 @@ def genera_portieri(scelta):
     elif scelta==2:
         return m_5
     return
-def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
+def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     tit_risultato=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=8-len(acquistati)   
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='D')]       
-    a,b,c = np.polyfit(x1, y1, 2)
+    
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['VAL'].values[0])
     except:
         return 1,0,[]
-    prezzo_probabile=a*p*p+b*p+c
+    prezzo_probabile=p
     if prezzo_probabile <=0:
         prezzo_probabile=1    
     try:
@@ -641,7 +706,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     #print("Prezzo di valore:",p)
     #print("Prezzo probabile d'asta:",int(prezzo_probabile))
     difensori=quotazioni.loc[(quotazioni['R'] == 'D')]
-    ds=list(quotazioni.loc[(quotazioni['R'] == 'D')].sort_values(by='Qt. A')['Nome'].values)
+    ds=list(quotazioni.loc[(quotazioni['R'] == 'D')].sort_values(by='VAL')['Nome'].values)
     squadre=[]
     valore_reparto=0
     valore=0
@@ -651,7 +716,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
    #print("Valore Reparto attuale:",valore)
-    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+    if  budget_rimasto -da_comprare <= 0:# or budget_rimasto -da_comprare<=int(prezzo_probabile):
         ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             d=random.choice(ds)
@@ -682,7 +747,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 except:
                     tit=1  
                 try:
-                    v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].values[0])
+                    v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[0])
                 except:
                     v=1
                 budget_rimasto=budget_rimasto-v
@@ -717,10 +782,10 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 tit=round(round(int(tit)/38,2)*100,2)
         except:
             tit=0
-        if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'])>1:#serve per problemi col excel
+        if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'])>1:#serve per problemi col excel
                 continue
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Qt. A'].values[0])
+            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[0])
         except:
             v=1
         if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
@@ -794,29 +859,14 @@ def difensori(u,budget):
     valore_reparto=0
 
     
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='D')]       
     quotazioni=quotazioni.loc[(quotazioni['R']=='D')]     
-    ### funzione prezzo
-    try:
-        w=pd.read_excel("./Funzioni Prezzo/difensori.txt", names=['Valore Nominale','Prezzo Asta'])
-        x1=w['Valore Nominale']
-        y1=w['Prezzo Asta']
-    except:
-        x1 = [1,5,10,15,20,25,30]
-        y1 = [1,10,15,20,30,40,50]
-    
-    try:
-        d=pd.read_excel("./old lega/dif.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
-        for el in d['VALORE ACQUISTO']:
-            y1.append(int(el))
-        for el in d['VALORE ATTUALE']:
-            x1.append(int(el))
-    except:
-        pass
+
+
     lista=[]
     try:
         f=open("./src/rigoristi.txt","r")
@@ -826,7 +876,7 @@ def difensori(u,budget):
         pass
     while(i!=9):
 
-        a,b,c = np.polyfit(x1, y1, 2)
+
         #input("Premere Invio per continuare ")
         os.system('CLS')      
      
@@ -876,7 +926,7 @@ def difensori(u,budget):
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,tit_risultato=dif(giocatore,acquistati,budget,x1,y1,giachiamati)
+        ok,prezzo,tit_risultato=dif(giocatore,acquistati,budget,giachiamati)
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
@@ -916,7 +966,11 @@ def difensori(u,budget):
                     p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
-                prezzo_probabile=a*p*p+b*p+c
+                try:
+                    prezzo_probabile=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['VAL'].values[0])
+                except:
+                    prezzo_probabile=0                    
+
             ptpr+=p
             prt+=prezzo_probabile
             
@@ -1007,23 +1061,12 @@ def difensori(u,budget):
         valore_reparto=0
         quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            try:
-                q=input("A quanto è andato? ")
-                q=int(q)
-                x1.append(prezzo)
-                y1.append(q)
-                giachiamati.append(giocatore)
-                print("", end="\r")
-                acquistati=[]
-                continue  
-            except:
-                acquistati=[]
-                giachiamati.append(giocatore)
-                continue
+
+            acquistati=[]
+            giachiamati.append(giocatore)
+            continue
         try:
             if int(quanto)>0:
-                x1.append(prezzo)
-                y1.append(int(quanto))
                 giachiamati.append(giocatore)                            
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
@@ -1040,20 +1083,20 @@ def difensori(u,budget):
             continue
         print("", end="\r")
     return reparto_finale
-def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
+def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
     tit_risultato=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=8-len(acquistati)
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='C')]
-    a,b,c = np.polyfit(x1, y1, 2)
+
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['VAL'].values[0])
     except:
         return 1,0,[]
-    prezzo_probabile=a*p*p+b*p+c
+    prezzo_probabile=p
     if prezzo_probabile <=0:
         prezzo_probabile=p
     try:
@@ -1064,7 +1107,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
     #print("Prezzo di valore:",p)
     #print("Prezzo probabile d'asta:",int(prezzo_probabile))
     centrocampisti=quotazioni.loc[(quotazioni['R'] == 'C')]
-    cs=list(quotazioni.loc[(quotazioni['R'] == 'C')].sort_values(by='Qt. A', ascending=False)['Nome'].values)
+    cs=list(quotazioni.loc[(quotazioni['R'] == 'C')].sort_values(by='VAL', ascending=False)['Nome'].values)
     squadre=[]
     valore_reparto=0
     valore=0
@@ -1074,7 +1117,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
     #print("Valore Reparto attuale:",valore)
-    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+    if  budget_rimasto -da_comprare <= 0:
         cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             cx=random.choice(cs)
@@ -1146,10 +1189,10 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
         if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'])>1:
             continue
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].values[0])
+            v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['VAL'].values[0])
         except:
             v=1 
-        if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
+        if int(tit)==0 and v<20:#evito che giocatori nuovi e forti non vengano considerati
             continue
         titolarieta=int(tit)
         try:
@@ -1157,7 +1200,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,x1,y1,giachiamati):
         except:
             gf=0        
         if titolarieta>10 or gf>3:
-            prezzo_previsto=int(a*v*v+b*v+c)
+            prezzo_previsto=int(v)
             new_budg=budget_rimasto-prezzo_previsto#v
             if new_budg > da_comprare:
                 acquistati.append(cx)
@@ -1220,29 +1263,14 @@ def centrocampisti(u,budget):
     valori=[]
     valore_reparto=0
     giachiamati=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='C')]       
     quotazioni=quotazioni.loc[(quotazioni['R']=='C')]     
 
-    try:
-        w=pd.read_excel("./Funzioni Prezzo/centrocampisti.txt", names=['Valore Nominale','Prezzo Asta'])
-        x1=w['Valore Nominale']
-        y1=w['Prezzo Asta']
-    except:
-        x1 = [1,5,10,15,20,25,30,35]
-        y1 = [1,10,20,30,35,40,50,60]
-    
-    try:
-        d=pd.read_excel("./old lega/centr.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
-        for el in d['VALORE ACQUISTO']:
-            y1.append(int(el))
-        for el in d['VALORE ATTUALE']:
-            x1.append(int(el))
-    except:
-        pass
+
     lista=[]
     try:
         f=open("./src/rigoristi.txt","r")
@@ -1268,10 +1296,11 @@ def centrocampisti(u,budget):
             squalificati=r.readlines()
         r.close()
     except:
-        squalificati=[]      
+        squalificati=[]     
+        
     while(i!=9):
         #input("Premere Invio per continuare ")
-        a,b,c = np.polyfit(x1, y1, 2)
+       
 
         os.system('CLS')   
         print("Budget Totale:",u)        
@@ -1316,7 +1345,7 @@ def centrocampisti(u,budget):
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,tit_risultato=centr(giocatore,acquistati,budget,x1,y1, giachiamati)
+        ok,prezzo,tit_risultato=centr(giocatore,acquistati,budget, giachiamati)
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
@@ -1337,9 +1366,11 @@ def centrocampisti(u,budget):
                     p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
-                prezzo_probabile=a*p*p+b*p+c
-            if prezzo_probabile <=0:
-                prezzo_probabile=1
+                try:
+                    prezzo_probabile=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['VAL'].values[0])
+                except:
+                    prezzo_probabile=1
+
             ptpr+=p
             prt+=prezzo_probabile
 
@@ -1425,23 +1456,13 @@ def centrocampisti(u,budget):
         valore_reparto=0
         quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            try:
-                q=input("A quanto è andato? ")
-                q=int(q)
-                x1.append(prezzo)
-                y1.append(q)        
-                giachiamati.append(giocatore)
-                print("", end="\r")
-                acquistati=[]
-                continue                   
-            except:
-                acquistati=[]
-                giachiamati.append(giocatore)
-                continue
+
+            acquistati=[]
+            giachiamati.append(giocatore)
+            continue
         try:
             if int(quanto)>0:
-                x1.append(prezzo)
-                y1.append(int(quanto))    
+
                 giachiamati.append(giocatore.upper())                    
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
@@ -1458,21 +1479,21 @@ def centrocampisti(u,budget):
             continue
         print("", end="\r")
     return reparto_finale
-def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
+def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     tit_risultato=[]    
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=6-len(acquistati)
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='A')]
-    a,b,c = np.polyfit(x1, y1, 2)
+    
 
     try:
-        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['Qt. A'].values[0])
+        p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['VAL'].values[0])
     except:
         return 1,0,1,[]
-    prezzo_probabile=a*p*p+b*p+c
+    prezzo_probabile=p
       
     
     if prezzo_probabile <=0:
@@ -1491,13 +1512,10 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
     squadre=[]
     valore_reparto=0
     valore=0
-    if len(acquistati)!=0:
-        for g in acquistati:
-            squadre.append(attaccanti[attaccanti['Nome'].str.contains(g.upper())]['Squadra'].values[0])
-            valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
-        valore=round(valore_reparto/len(acquistati),0)
-    #print("Valore reparto attuale:",valore)
-    if  budget_rimasto -da_comprare <= 0 or budget_rimasto -da_comprare<=int(prezzo_probabile):
+    
+
+
+    if  budget_rimasto -da_comprare <= 0:
         ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
             ax=random.choice(ass)
@@ -1534,30 +1552,46 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 k+=1
         return 0,p,prezzo_ritorno,tit_risultato
     tentativi=0
+    
+    ############################
+    ############################
+    try:
+        with open("./indice/riserve.txt","r") as r:
+            riserve=r.readlines()
+        r.close()    
+    except:
+        riserve=[]
+    try:
+        with open("./indice/titolari.txt","r") as r:
+            titolari=r.readlines()
+        r.close()                
+    except:
+        titolari=[]
     i=0
     while(len(acquistati)!=6):
-        #ax=random.choice(ass)
+        ax=random.choice(ass)
+        #try:
+        #    ax=ass[i]
+        #except:
+        #    ax=random.choice(ass)
+        
+        ############
         try:
-            ax=ass[i]
+            v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values[0])
         except:
-            ax=random.choice(ass)
-        i+=1
-        if ax.upper() in acquistati or ax.upper() in giachiamati:
+            v=1
+            
+        
+        if budget_rimasto-v-da_comprare<=0:
             continue
         try:
-            with open("./indice/titolari.txt","r") as r:
-                l=r.readlines()
-            r.close()
-            for el in l:
+            for el in titolari:
                 if ax in el:
                     tit=el.split(":")[1].replace("%","")
                     trovato=1
                     break
             if trovato==0:
-                with open("./indice/riserve.txt","r") as r:
-                    l=r.readlines()
-                r.close()
-                for el in l:
+                for el in riserve:
                     if ax in el:
                         tit=el.split(":")[1].replace("%","")
                         trovato=1
@@ -1567,44 +1601,40 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                 tit=int(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
         except:
             tit=0
-        try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].values[0])
-        except:
-            v=1
-        if int(tit)==0 and v<5:
+     
+        if int(tit)==0 and v<50:
             continue
         titolarieta=int(tit)
         try:
             gf=(t[t['Nome'].str.contains(ax.upper())]['Gf'].values[0])
         except:
             gf=0
-        try:
-            p=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Qt. A'].values[0])
-        except:
-            p=0
-        if  (titolarieta>10 and tentativi>100) or gf>5 or p> 20:
-            prezzo_previsto=int(a*v*v+b*v+c)
+        prezzo_previsto=v
+        if prezzo_previsto<=0:
+            continue
+        
+
+        if  (titolarieta>10  or gf>5 or v>50 )   and not (ax.upper() in acquistati or ax.upper() in giachiamati) :
+            
             new_budg=budget_rimasto-prezzo_previsto
-            if new_budg<=0:
-                continue
             if new_budg > da_comprare:
                 acquistati.append(ax)
                 da_comprare-=1
-                prezzo=budget_rimasto-new_budg
+                
                 budget_rimasto=new_budg
                 tit_risultato.append(titolarieta)                
                 ass=list(quotazioni.loc[(quotazioni['R'] == 'A')& (quotazioni['Qt. A'] < budget_rimasto )]['Nome'].values)#& ((quotazioni['Qt. A'])<= 5)
-                if ax in ass:
-                    ass.remove(ax)
-            if budget_rimasto <= da_comprare:
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < budget_rimasto)]['Nome'].values)
+            elif new_budg <= da_comprare:
+                
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
                 k=0
                 while(k<da_comprare):
                     ax=random.choice(ass)
                     if ax not in acquistati and ax not in giachiamati:
                         acquistati.append(ax)
+                        giachiamati.append(ax)
                         prezzo=1
-                        budget_rimasto=budget_rimasto-1
+                        budget_rimasto=new_budg-1
                         try:
                             with open("./indice/titolari.txt","r") as r:
                                 l=r.readlines()
@@ -1633,19 +1663,19 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                         k+=1
                         
                 return 0,p,prezzo_ritorno,tit_risultato
-            else:
-                continue
         else:
             tentativi+=1 
+            
             if tentativi > 200:
-                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 10)]['Nome'].values)
+
+                ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
                 k=0 
                 while(k<da_comprare):
                     ax=random.choice(ass)
                     if ax not in acquistati and ax not in giachiamati:
-                        acquistati.append(ax)
+                        
                         prezzo=1
-                        budget_rimasto=budget_rimasto-1
+                        budget_rimasto=new_budg-1
                         try:
                             with open("./indice/titolari.txt","r") as r:
                                 l=r.readlines()
@@ -1672,8 +1702,9 @@ def att(giocatore_chiamato,acquistati,budget_rimasto,x1,y1, giachiamati):
                         titolarieta=int(tit)
                         tit_risultato.append(titolarieta)
                         k+=1
+                        acquistati.append(ax)
+                        giachiamati.append(ax)
                 return 0,p,prezzo_ritorno,tit_risultato
-            continue
     return 0,p,prezzo_ritorno,tit_risultato
 def attaccanti(u,budget):
     i=1
@@ -1684,30 +1715,17 @@ def attaccanti(u,budget):
     valori=[]
     giachiamati=[]
     valore_reparto=0
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','Diff.'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
+    
+    
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='A')]
     quotazioni=quotazioni.loc[(quotazioni['R']=='A')]     
     
-    
-    try:
-        w=pd.read_excel("./Funzioni Prezzo/attaccanti.txt", names=['Valore Nominale','Prezzo Asta'])
-        x1=w['Valore Nominale']
-        y1=w['Prezzo Asta']
-    except:
-        x1 = [1,5,10,15,20,25,30,35,40,45]
-        y1 = [1,10,30,40,50,70,110,140,160,200]
-    
-    try:
-        d=pd.read_excel("./old lega/att.xlsx", names=['VALORE ACQUISTO','VALORE ATTUALE'])
-        for el in d['VALORE ACQUISTO']:
-            y1.append(int(el))
-        for el in d['VALORE ATTUALE']:
-            x1.append(int(el))
-    except:
-        pass
+
+
     lista=[]
     try:
         f=open("./src/rigoristi.txt","r")
@@ -1737,7 +1755,7 @@ def attaccanti(u,budget):
 
 
     while(i!=7):
-        a,b,c = np.polyfit(x1, y1, 2)
+        
         #input("Premere Invio per continuare ")
         os.system('CLS')        
         print("Budget Totale:",u)
@@ -1782,7 +1800,7 @@ def attaccanti(u,budget):
         for el in reparto_finale.keys():
             acquistati.append(el)
         acquistati.append(giocatore)
-        ok,prezzo,pr,tit_risultato=att(giocatore,acquistati,budget,x1,y1, giachiamati)
+        ok,prezzo,pr,tit_risultato=att(giocatore,acquistati,budget, giachiamati)
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
@@ -1803,9 +1821,10 @@ def attaccanti(u,budget):
                     p=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Qt. A'].values[0])
                 except:
                     p=0
-                prezzo_probabile=a*p*p+b*p+c
-            if prezzo_probabile <=0:
-                prezzo_probabile=1
+                try:
+                    prezzo_probabile=int(quotazioni[quotazioni['Nome'].str.contains(el.upper())]['VAL'].values[0])
+                except:
+                    prezzo_probabile=1  
             ptpr+=p
             prt+=prezzo_probabile
             with open("./categorie/attaccanti.json","r") as r:
@@ -1887,24 +1906,13 @@ def attaccanti(u,budget):
         valore_reparto=0
         quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
         if len(quanto)==0:
-            try:
-                q=input("A quanto è andato? ")
-                q=int(q)
-                x1.append(prezzo)
-                
-                y1.append(q)
-                print("", end="\r")
-                acquistati=[]
-                giachiamati.append(giocatore)
-                continue        
-            except:
-                acquistati=[]
-                giachiamati.append(giocatore)
-                continue
+
+            acquistati=[]
+            giachiamati.append(giocatore)
+            continue
         try:
             if int(quanto)>0:
-                x1.append(prezzo)
-                y1.append(int(quanto))
+   
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u=u-int(quanto)
