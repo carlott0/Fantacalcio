@@ -321,8 +321,24 @@ def rigoristi():
         for el in buff.split(","):
             if el.strip()=='':
                 continue    
-            lista.append(el.strip())
-        return lista
+            lista.append(el.strip().upper())
+        #return lista
+        link="https://sosfanta.calciomercato.com/ecco-tutti-i-rigoristi-squadra-per-squadra-gerarchie-e-novita-per-la-stagione-2022-23/"
+        session = HTMLSession()
+        session.headers.update({
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+                    'Connection':'close'
+        })        
+        r=session.get(link)
+        soup= BeautifulSoup(r.content, "html.parser")
+        lista2=[]
+        for el in soup.find("div",{"class","entry-content"}).find_all("strong"):
+            if el.text.strip().isupper() or not el.text.strip()[0].isupper() or el.text.strip()=="Condividi su":
+                continue
+            lista2.append(el.text.strip().upper())
+        listafin=list(np.unique(lista+lista2))
+        return listafin     
+        
     except:
         return []
        

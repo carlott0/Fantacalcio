@@ -1,129 +1,122 @@
 {
+    "SUPERTOP ": [
+        " Immobile",
+        " Lukaku"
+    ],
     "TOP ": [
         " Abraham",
-        " Dybala",
+        " Berardi",
         " Lautaro",
-        " Muriel",
         " Osimhen",
-        "Immobile",
-        "\u00a0Vlahovic"
+        " Vlahovic"
     ],
     "SEMITOP ": [
-        " Berardi",
-        " Dzeko",
-        " Giroud",
-        " Ibrahimovic",
-        " Joao Pedro",
-        " Morata",
-        " Zapata",
-        "Insigne"
+        " Dybala",
+        " Leao",
+        " Zapata"
     ],
     "OTTIMI ATTACCANTI ": [
-        " Belotti",
-        "Correa"
-    ],
-    "BUONI ATTACCANTI ": [
         " Arnautovic",
-        " Caputo",
-        " Leao",
-        " Lozano",
-        " Raspadori",
-        " Simy",
-        "Quagliarella"
+        " Di Maria",
+        " Giroud",
+        " Jovic"
     ],
     "JOLLY PRIMA FASCIA ": [
-        " Ilicic",
-        " Kean",
-        " Pedro",
-        " Politano",
-        " Rebic",
-        " Shomurodov",
-        "Mertens"
+        " Dzeko",
+        " Muriel",
+        " Origi"
     ],
     "BUONI TITOLARI ": [
-        " Boga",
+        " Beto",
+        " Caprari",
+        " Caputo",
+        " Gonzalez",
+        " Raspadori"
+    ],
+    "SCOMMESSE ": [
+        " Alvarez",
+        " Botheim"
+    ],
+    "BUONI ATTACCANTI ": [
+        " Bonazzoli",
+        " Ceesay",
         " Destro",
-        " Pavoletti",
-        "Barrow"
+        " Henry",
+        " Lozano",
+        " Sanabria",
+        " Verde"
     ],
     "JOLLY SECONDA FASCIA ": [
-        " Keita",
-        " Nzola",
-        " Ounas",
+        " Boga",
+        " Djuric",
+        " Kean",
+        " Lasagna",
+        " Mota Carvalho",
         " Piccoli",
-        " Sanabria",
-        " Sanchez",
-        "Mayoral"
+        " Quagliarella",
+        " Rebic"
     ],
-    "LOW COST PRIMA FASCIA\u00a0": [
-        " Beto",
-        " Brekalo",
-        " Cutrone",
-        " Henry",
-        " Pussetto",
-        " Ribery",
-        " Simeone",
-        "Verde"
-    ],
-    "LOW COST SECONDA FASCIA\u00a0": [
-        " Bonazzoli",
-        " Caprari",
-        " Colley",
-        " Deulofeu",
-        " Ekuban",
-        " El Shaarawy",
-        " Gabbiadini",
-        " Johnsen",
+    "LOW COST PRIMA FASCIA ": [
+        " Barrow",
+        " Nzola",
         " Okereke",
-        " Pandev",
-        " Pinamonti",
-        " Pjaca",
-        "Gyasi"
+        " Success"
     ],
-    "GIOVANISSIMI ": [
-        " Antiste",
+    "SCOMMESSE GIOVANI ": [
         " Cancellieri",
-        " Kaio Jorge",
-        " Kallon",
-        " Moro",
+        " Colombo",
         " Pellegri",
         " Satriano",
-        "Buksa"
+        " Seck"
     ],
-    "JOLLY TERZA FASCIA ": [
-        " Carles Perez",
-        " Djuric",
-        " Forte",
-        " Kalinic",
-        " Lasagna",
-        " Manaj",
-        " Petagna",
-        "Defrel"
+    "JOLLY QUARTA FASCIA ": [
+        " Afena-Gyan",
+        " Defrel",
+        " Gabbiadini",
+        " Ibrahimovic"
     ],
-    "JOLLY QUARTA FASCIA\u00a0": [
-        " Di Francesco",
-        " Farias",
-        " Forestieri",
-        " La Mantia",
-        " Salcedo",
-        " Sansone",
+    "LOW COST SECONDA FASCIA ": [
+        " Buonaiuto",
+        " Ribery",
+        " Tsadjout",
+        " Zanimacchia"
+    ],
+    "LEGHE NUMEROSE ": [
+        " Ciofani",
+        " De Luca",
+        " Di Mariano",
+        " Gytkjaer",
+        " Nestorovski",
         " Strelec",
-        " Torregrossa",
-        " Warming",
-        " Zaza",
-        " van Hooijdonk",
-        "Muriqi"
+        " Valencia"
     ],
     "RISCHI ": [
-        " Bocalon",
-        " Success",
-        " Vergani",
-        "Kokorin"
+        " Antiste",
+        " Di Carmine",
+        " Lazetic",
+        " Oddei",
+        " Rodriguez",
+        " Sansone"
     ],
     "DA EVITARE ": [
         " Edera",
-        " Munteanu",
-        " Nestorovski",
-        "Santander"
+        " Gondo",
+        " Kaio Jorge",
+        " Kokorin",
+        " Podgoreanu",
+        " Strizzolo",
+        " Voelkerling"
+    ],
+    "MERCATO ": [
+        " Ciss\u00e8",
+        " Deulofeu",
+        " Ilicic",
+        " Ounas",
+        " Petagna",
+        " Pinamonti",
+        " Sanchez",
+        " Shomurodov",
+        " Simeone",
+        " Zaza"
     ]
 }
