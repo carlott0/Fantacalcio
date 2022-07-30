@@ -2059,6 +2059,36 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Att:",budg_att+(budg_portieri-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
         salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif,budg_centr,budg_att+(budg_portieri-spesa))
+def salvaTutto():
+    
+    w_p=open("./src/portieri.txt", "r")
+    p=w_p.readlines()
+    w_p.close()
+    w_p=open("./src/difensori.txt", "r")
+    d=w_p.readlines()
+    w_p.close()
+    w_p=open("./src/centrocampisti.txt", "r")
+    c=w_p.readlines()
+    w_p.close()
+    w_p=open("./src/attaccanti.txt", "r")
+    a=w_p.readlines()
+    w_p.close()
+    
+    w_f=open("./SQUADRAFINALE.txt", "w")
+    
+    for el in p:
+        w_f.write(el)
+        w_f.write("\n")
+    for el in d:
+        w_f.write(el)
+        w_f.write("\n")
+    for el in c:
+        w_f.write(el)
+        w_f.write("\n")
+    for el in a:
+        w_f.write(el)
+        w_f.write("\n")        
+    w_f.close()
 def salvasuFile(tot,rimasti,port,dif,centr,att):
     t=str(tot)
     r=str(rimasti)
@@ -2139,6 +2169,7 @@ def generaCategorie():
     w.close()
     
 
+    
 def main():
     
     os.system('CLS')
@@ -2387,6 +2418,7 @@ def main():
                 print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 continue
             a(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
+            salvaTutto()
             os.system('CLS')
             print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
 if __name__ == "__main__":
