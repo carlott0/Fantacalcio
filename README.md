@@ -4,6 +4,10 @@ Assistente guida per l'asta iniziale del fantacalcio.
 ![image](https://user-images.githubusercontent.com/49305804/181594220-3f284deb-dfa2-4e1f-b953-54d10f2afd32.png)
 
 
+AGGIORNAMENTO:
+Puoi scaricare lo zip con l'eseguibile .exe direttamente da qui:
+https://www.mediafire.com/file/a7zi477oxqflxn5/FantaCalcio.zip/file
+
 Requirements:
 
 Python3
