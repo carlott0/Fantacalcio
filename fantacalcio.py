@@ -802,8 +802,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                 tit=round(round(int(tit)/38,2)*100,2)
         except:
             tit=0
-        if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'])>1:#serve per problemi col excel
-                continue
+
         try:
             v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[0])
         except:
@@ -817,7 +816,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
             gf=0        
         if titolarieta>10 or gf>3:
             prezzo_previsto=int(v)
-            new_budg=budget_rimasto-prezzo_previsto# se troppo alto metti v
+            new_budg=budget_rimasto-prezzo_previsto
             if new_budg > da_comprare:
                 acquistati.append(d)
                 da_comprare-=1
@@ -925,6 +924,10 @@ def difensori(u,budget):
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
+            if len(gx)==0:
+                input("Nessun giocatore trovato, riprova. Premere Invio per continuare ")
+                acquistati=[]
+                continue
             print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
             if scelta !="y" and scelta !="Y" and len(scelta)>0:
@@ -1206,8 +1209,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                 tit=round(round(int(tit)/38,2)*100,2)
         except:
             tit=0          
-        if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'])>1:
-            continue
+
         try:
             v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['VAL'].values[0])
         except:
@@ -1347,6 +1349,10 @@ def centrocampisti(u,budget):
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
+            if len(gx)==0:
+                input("Nessun giocatore trovato, riprova. Premere Invio per continuare ")
+                acquistati=[]
+                continue
             print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
             if scelta !="y" and scelta !="Y" and len(scelta)>0:
@@ -1802,6 +1808,10 @@ def attaccanti(u,budget):
                 break
         if trovato==0:
             gx=calcola_giocatore_simile(giocatore,quotazioni)
+            if len(gx)==0:
+                input("Nessun giocatore trovato, riprova. Premere Invio per continuare ")
+                acquistati=[]
+                continue
             print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
             scelta=input()
             if scelta !="y" and scelta !="Y" and len(scelta)>0:
@@ -1965,7 +1975,7 @@ def a(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Hai speso troppo, multa. :(")
         print("Crediti spesi in più:",abs(budg_att-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_att-spesa,0,0,0,0)
+        salvasuFile(budget_tot,budg_att-spesa,0,0,0,0)
     else:
         print("Crediti rimasti:",(budg_att-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
@@ -2185,16 +2195,28 @@ def main():
     try:
         if not path.exists("./src/"):
             os.makedirs("./src/")
+            w_p=open("./src/portieri.txt", "w")
+            w_d=open("./src/difensori.txt", "w")
+            w_c=open("./src/centrocampisti.txt", "w")
+            w_a=open("./src/attaccanti.txt", "w")
+            w_p.close()    
+            w_d.close()
+            w_c.close()
+            w_a.close()
         if not path.exists("./categorie/"):
             os.makedirs("./categorie/")
-        w_p=open("./src/portieri.txt", "w")
-        w_d=open("./src/difensori.txt", "w")
-        w_c=open("./src/centrocampisti.txt", "w")
-        w_a=open("./src/attaccanti.txt", "w")
-        w_p.close()    
-        w_d.close()
-        w_c.close()
-        w_a.close()
+        if not path.exists("./src/portieri.txt"):
+            w_p=open("./src/portieri.txt", "w")
+            w_p.close()
+        if not path.exists("./src/difensori.txt"):
+            w_d=open("./src/difensori.txt", "w")
+            w_d.close()
+        if not path.exists("./src/centrocampisti.txt"):
+            w_c=open("./src/centrocampisti.txt", "w")
+            w_c.close()
+        if not path.exists("./src/attaccanti.txt"):
+            w_a=open("./src/attaccanti.txt", "w")
+            w_a.close()
         
         generaCategorie()
         pertit()
