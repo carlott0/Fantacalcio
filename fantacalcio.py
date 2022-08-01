@@ -14,8 +14,10 @@ import os, errno
 from tabulate import tabulate
 from termcolor import colored
 import requests
-from pyfiglet import Figlet
+#from pyfiglet import Figlet
 import json
+
+
 
 def getInfortunati():
     session = HTMLSession()
@@ -483,7 +485,8 @@ def ottieniVal(ruoli,qa):
 def calcola_quotazioni():
     try:
         link="https://www.fantacalcio.it/api/v1/Excel/prices/17/1"
-
+        
+        
         headers={
         "authority": "www.fantacalcio.it",
         "method": "GET",
@@ -492,7 +495,7 @@ def calcola_quotazioni():
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "it,en-US;q=0.9,en;q=0.8,it-IT;q=0.7",
-        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=KrPH%2BfexHDWjYl7t6%2BYz6ia4Co99jgjt7SnwSeoRwgfZnM4AMYpQx%2FMX%2BmfzXvqNGvVhd8%2Bif4rvZ7KLpASAH8Ppp7PkgGsw3oJWd2OcPdMPEAM3LEVNGNR9ALJDrImrdnvXc4s4AxFAIQBNge8c%2BDqMu9jNaSHg07K8StogKv%2FBcrlzwz3c4qJQNf7bRJ9HA%2BqpPkMZyKcidfpOhqGzmL0XeIKFiLr6QzRqLSsXZkoCVduynfnDyV6C5xgizYmLSyxejdQ1AQXcb9N62sF5Uk8sG8s%2F4CqeLNik86al9lzjYQZWGn61xRSko6kswaw7WtB35gbDn%2Fij87af6i%2FolDd2qF8X0vpqNSOw4edI1jtZWY8ZDfve1CFaSkpcM3uPnYRTclyXfjpFvd3k%2BqLJmLtpG3HwzmTqEOPZxhmet0XLlmwtZCqaKLDYMxJ%2BV%2BESNp7IE8U5zGJygt6oFkHBu3EDggvBr6kM;",
+        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=Ccazmp6ks930QjnK3WWkcia4Co99jgjt%2BqRLsOyS4QF71Y5H4byIRx63kVyztFKqOkEijfDQY0nC%2FeayQVh3Gd6CVndjnD3TDxADNyxFTRjUfQCyQ6yJq3Z713OLOAMRF0HBJlp3WQPg%2Fwp2Dr%2BdSiVJw%2FDlE9clGjVqNDzWOjpdLezQBslXTBse85hfujGPD9Qiq52fUTzplMzdgyGag8qYlPa%2FXbJHSB0fqQJpZpvbFqGHqmcomRj4kWSCz8cvr%2F6yDSCo1Yd9kR4mv5V0p32WCbRtnS0N5sfpxVBLG1czgUJXpezNauQF3CT2a2Og84uinzAWqeSRaH8XK%2Bv81SaGqp8GnmFQQ1CScVdoinKLR4Br9EudzjwaFJi0Y5D3%2FqOgJJ2CZ98WyB2Y7HovnI%2BCnr7r7HWH%2F%2BagHEBd%2BU3BXQelfEQCvH44Qg6owRdb8mavIik8G1vY%2BeHMz17CDA%3D%3D;",
         "dnt": "1",
         "sec-ch-ua": "\".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
         "sec-ch-ua-mobile": "?0",
@@ -504,8 +507,9 @@ def calcola_quotazioni():
         "service-worker-navigation-preload": "true",
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-        'Connection':'close'
-        }
+        'Connection':'close'}
+        
+        
         
         
         r=requests.get(link, headers=headers)
@@ -547,7 +551,7 @@ def calcola_giocatori():
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "it,en-US;q=0.9,en;q=0.8,it-IT;q=0.7",
-        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=KrPH%2BfexHDWjYl7t6%2BYz6ia4Co99jgjt7SnwSeoRwgfZnM4AMYpQx%2FMX%2BmfzXvqNGvVhd8%2Bif4rvZ7KLpASAH8Ppp7PkgGsw3oJWd2OcPdMPEAM3LEVNGNR9ALJDrImrdnvXc4s4AxFAIQBNge8c%2BDqMu9jNaSHg07K8StogKv%2FBcrlzwz3c4qJQNf7bRJ9HA%2BqpPkMZyKcidfpOhqGzmL0XeIKFiLr6QzRqLSsXZkoCVduynfnDyV6C5xgizYmLSyxejdQ1AQXcb9N62sF5Uk8sG8s%2F4CqeLNik86al9lzjYQZWGn61xRSko6kswaw7WtB35gbDn%2Fij87af6i%2FolDd2qF8X0vpqNSOw4edI1jtZWY8ZDfve1CFaSkpcM3uPnYRTclyXfjpFvd3k%2BqLJmLtpG3HwzmTqEOPZxhmet0XLlmwtZCqaKLDYMxJ%2BV%2BESNp7IE8U5zGJygt6oFkHBu3EDggvBr6kM;",
+        "cookie": "addtl_consent=1~39.4.3.9.6.9.13.6.4.15.9.5.2.7.4.1.7.1.3.2.10.3.5.4.21.4.6.9.7.10.2.9.2.18.7.6.14.5.20.6.5.1.3.1.11.29.4.14.4.5.3.10.6.2.9.6.6.4.5.4.4.29.4.5.3.1.6.2.2.17.1.17.10.9.1.8.6.2.8.3.4.142.4.8.42.15.1.14.3.1.8.10.25.3.7.25.5.18.9.7.41.2.4.18.21.3.4.2.1.6.6.5.2.14.18.7.3.2.2.8.20.8.8.6.3.10.4.20.2.13.4.6.4.11.1.3.22.16.2.6.8.2.4.11.6.5.33.11.8.1.10.28.12.1.3.21.2.7.6.1.9.30.17.4.9.15.8.7.3.6.6.7.2.4.1.7.12.13.22.13.2.12.2.10.5.15.2.4.9.4.5.4.7.13.5.15.4.13.4.14.8.2.15.2.5.5.1.2.2.1.2.14.7.4.8.2.9.10.18.12.13.2.18.1.1.3.1.1.9.25.4.1.19.8.4.5.3.5.4.8.4.2.2.2.14.2.13.4.2.6.9.6.3.4.3.5.2.3.6.10.11.6.3.16.3.11.3.1.2.3.9.19.11.15.3.10.7.6.4.3.4.6.3.3.3.3.1.1.1.6.11.3.1.1.11.6.1.10.5.2.6.3.2.2.4.3.2.2.7.15.7.12.2.1.3.3.4.5.4.3.2.2.4.1.3.1.1.1.2.9.1.6.9.1.5.2.1.7.2.8.11.1.3.1.1.2.1.3.2.6.1.12.5.3.1.3.1.1.2.2.7.7.1.4.1.2.6.1.2.1.1.3.1.1.4.1.1.2.1.8.1.7.4.3.2.1.3.5.3.9.6.1.15.10.28.1.2.2.12.3.4.1.6.3.4.7.1.3.1.1.3.1.5.3.1.3.2.2.1.1.4.2.1.2.1.2.2.2.4.2.1.2.2.2.4.1.1.1.2.2.1.1.1.1.2.1.1.1.2.2.1.1.2.1.2.1.7.1.2.1.1.1.2.1.1.1.1.2.1.1.3.2.1.1.8.1.1.1.5.2.1.6.5.1.1.1.1.1.2.2.3.1.1.4.1.1.2.2.1.1.4.3.1.2.2.1.2.1.2.3.1.1.2.4.1.1.1.5.1.3.6.3.1.5.2.3.4.1.2.3.1.4.2.1.2.2.2.1.1.1.1.1.1.11.1.3.1.1.2.2.5.2.3.3.5.1.1.1.4.2.1.1.2.5.1.9.4.1.1.3.1.7.1.4.5.1.7.2.1.1.1.2.1.1.1.4.2.1.12.1.1.3.1.2.2.3.1.2.1.1.1.2.1.1.2.1.1.1.1.2.1.3.1.5.1.2.4.3.8.2.2.9.7.2.3.2.1.4.6.1.1.6.1.1; euconsent-v2=CPb8hAAPb8hAAAKAqAITCXCsAP_AAH_AABCYI4Nd_X__bX9j-_5_6ft0eY1f9_r37uQzDhfNs-8F3L_W_LwX32E7NF36pq4KmR4Eu3LBIQNlHMHUTUmwaokVrzHsak2cpyNKJ7JEknMZe2dYGF9Pn9lD-YKY7_5_9_b52T-9_9_-39T3_8ff__dp_2__-vDfV599jfn9fV_789KP___9v__8__________38EbwCDARAIACDBABAAAACEAAEAAkAIAAAAQAAUASADgoAAhYBAACEAAgESEIAAIAQEAMAAAEEACQAIAQAsEAgAAgEAAIAAQAAABAQAAwAkBAAAAACQgQAgABAgIAgAAOQgACgAggBCAQAACiQwAgDrOAAAQQIVAACSQEAgAAQsDAcACAlYkABSAAoAAhBCgFEAkJBZAAQAAuACgAKgAZAA5AB4AIAAYQA0ADUAHkAQwBFACYAE8AKoAbwA5gB6AD8AISAQwBEgCOAEsAJoAUoAtwBhgDIAGWANUAbIA74B7AHxAPsA_YB_gIGARSAi4CMQEaARwAlIBQQCngFXALmAYoA0QBrADaQG4AbwA4gB6AD5AIdARCAkQBMQCZQE2AJ2AUOApEBTQCxQFoALYAXIAu8BeYDBgGGwMjAyQBk4DLgGcgM-AaQA06BrAGsgNvAbqA4KByYHKAOXAdYA8cB7QEIQIXgQ9Ah-BEMCKRKCAAAgABYAFAAMgAcAA_ADAAMQAeABEACYAFUALgAYgAzABtgEMARIAjgBRgClAFuAMIAZQA1QBsgDvAH4ARgAjgBJwCngFXgLQAtIBdQDFAG4AOoAfIBDoCKgEXgJEATYAsUBbAC7QF5gMjAZOAywBnIDPAGfANIAawA28BwADrAHtAQPAgkBC8CGoEPQIsjoNwAC4AKAAqABkADkAHwAgABdADAAMYAaABqADwAH0AQwBFACYAE8AKsAXABdADEAGYAN4AcwA9AB-gEMARIAjoBLAEwAJoAUYApQBYgC3gGEAYcAyADKAGiANkAd4A9oB9gH6AP8AgcBFAEYgI4AjsBKQEqAKCAU8Aq4BYoC0ALTAXMBdYC8gL0AYoA2gBuADiAHUAPQAh0BEICKgEXwJBAkQBKgCZAE2AJ2AUOApoBVgCxQFoALYAXAAuQBdoC7wF5gL6AYMAw0BjADHoGRgZIAycBlUDLAMuAZmAzkBnwDRIGkAaSA0sBpwDVQGsANvAbqA4uByYHKAOXAdYA8cB6QD2gH1gQBAgkBBoCDwELwIdAQ9AikQghAALAAoABkAFwAMQAagBDACYAFMAKoAXAAxABmADeAHoARwApQBYgDCAGUAO8AfYA_wCKAEYAI4ASmAoIChgFPAKvAWgBaQC5gGKANoAdQA9ACIYEggSIAk4BKgCbAFNALFAWiAtgBcAC5AF2gMjAZOAzkBngDPgGiANJAaWA1UBwADlAHWAPHAgkBCgCF4EOgIelIKYAC4AKAAqABkADkAHwAggBgAGMANAA1AB5AEMARQAmABPACkAFUAMQAZgA5gB-gEMARIAowBSgCxAFuAMIAZQA0QBqgDZAHfAPsA_QCLAEYgI4AjoBKYCggKGAVcArYBcwC8gGKANoAbgA9ACHQEXgJEAScAmwBOwChwFigLQAWwAuABcgC7QF5gL6AYaAxiBkYGSAMngZYBlwDOQGeAM-gaQBpMDWANZAbeA3UBwUDkwOUAcuA6wB4oDxwHtAQhAheBDMCHQEPQIgARSFQGQAKABDACYAFwARwAywCMAEcAKvAWgBaQDeAJBATEAmwBTYC2AFyALzAZGAzkBngDPgG5AOUAheMgLABDACYAI4AZYA-wCMAEcAKuAVsA3gCTgExAJsAWiAtgBeYDIwGcgM8AZ8A5QCF4aA-AFwAQwAyABlgDZAH4AQAAgoBGACngFXgLQAtIBrADeAHVAPkAh0BFQCRAE2AJ2AUiAuQBjADIwGTgM5AZ4Az4BygDrBEBgAQwAyABlgDZAH4AQAAjABTwCrgGsAOqAfIBDoCRAE2AJ2AUiAuQBkYDJwGcgM-AcoA6wA.f_gAAAAAAAAA; fanta_web_sign=value; fantacalcio.it=Ccazmp6ks930QjnK3WWkcia4Co99jgjt%2BqRLsOyS4QF71Y5H4byIRx63kVyztFKqOkEijfDQY0nC%2FeayQVh3Gd6CVndjnD3TDxADNyxFTRjUfQCyQ6yJq3Z713OLOAMRF0HBJlp3WQPg%2Fwp2Dr%2BdSiVJw%2FDlE9clGjVqNDzWOjpdLezQBslXTBse85hfujGPD9Qiq52fUTzplMzdgyGag8qYlPa%2FXbJHSB0fqQJpZpvbFqGHqmcomRj4kWSCz8cvr%2F6yDSCo1Yd9kR4mv5V0p32WCbRtnS0N5sfpxVBLG1czgUJXpezNauQF3CT2a2Og84uinzAWqeSRaH8XK%2Bv81SaGqp8GnmFQQ1CScVdoinKLR4Br9EudzjwaFJi0Y5D3%2FqOgJJ2CZ98WyB2Y7HovnI%2BCnr7r7HWH%2F%2BagHEBd%2BU3BXQelfEQCvH44Qg6owRdb8mavIik8G1vY%2BeHMz17CDA%3D%3D;",
         "dnt": "1",
         "sec-ch-ua": "\".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
         "sec-ch-ua-mobile": "?0",
@@ -559,8 +563,8 @@ def calcola_giocatori():
         "service-worker-navigation-preload": "true",
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-        'Connection':'close'
-        }
+        'Connection':'close'}
+        
         
         
         r=requests.get(link, headers=headers)
@@ -2174,8 +2178,8 @@ def main():
     
     os.system('CLS')
     os.system('color')
-    f = Figlet(font='slant')
-    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    #f = Figlet(font='slant')
+    #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
 
     print("Generazione file di sistema in corso, attendere...")
     try:
@@ -2197,18 +2201,18 @@ def main():
         getInfortunati()
     except:
         os.system('CLS')
-        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         print(colored("Errore nella generazione dei file di sistema, esco.",'red'))
         exit()
     os.system('CLS')
-    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
     print(colored("Generazione file di sistema completata.",'green'))
     print("Lettura dei crediti disponibili...")
     budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
     
     
     os.system('CLS')
-    print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
     print(colored("Generazione file di sistema completata.",'green'))
     print(colored("Lettura dei crediti disponibili completata",'green'))
     print("Aggiornamento listone...")
@@ -2217,13 +2221,13 @@ def main():
     ok2=0
     if r==0:
         os.system('CLS')
-        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         print(colored("Generazione file di sistema completata.",'green'))
         print(colored("Lettura dei crediti disponibili completata",'green'))
         print(colored("Aggiornamento listone completato.",'green'))
     else:
         os.system('CLS')
-        print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         print(colored("Generazione file di sistema completata.",'green'))
         print(colored("Lettura dei crediti disponibili completata",'green'))    
         print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2235,21 +2239,21 @@ def main():
     if r==0:
         if ok==0:
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
             print(colored("Aggiornamento listone completato.",'green'))
             print(colored("Aggiornamento rigoristi completato.",'green'))
         else:
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
             print(colored("Errore nell'aggiornamento del listone.",'red'))
     else:
         if ok==0:
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
             print(colored("Aggiornamento listone completato.",'green'))
@@ -2257,7 +2261,7 @@ def main():
             ok2=1
         else:
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
             print(colored("Errore nell'aggiornamento del listone.",'red'))    
@@ -2270,7 +2274,7 @@ def main():
         if ok==0:
             if ok2==0:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Aggiornamento listone completato.",'green'))
@@ -2278,7 +2282,7 @@ def main():
                 print(colored("Aggiornamento classifica completato.",'green'))
             else:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Aggiornamento listone completato.",'green'))
@@ -2287,7 +2291,7 @@ def main():
         else:
             if ok2==0:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2295,7 +2299,7 @@ def main():
                 print(colored("Aggiornamento classifica completato.",'green'))   
             else:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2306,7 +2310,7 @@ def main():
         if ok==0:
             if ok2==0:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Aggiornamento listone completato.",'green'))
@@ -2314,7 +2318,7 @@ def main():
                 print(colored("Errore nell'aggiornamento della classifica.",'red'))
             else:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Aggiornamento listone completato.",'green'))
@@ -2323,7 +2327,7 @@ def main():
         else:
             if ok2==0:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2331,7 +2335,7 @@ def main():
                 print(colored("Errore nell'aggiornamento della classifica.",'red'))   
             else:
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
                 print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2362,7 +2366,7 @@ def main():
             print("Inserire una scelta valida.")
             input("Premere invio per continuare")
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             continue
         if scelta=="1":
             w_p=open("./src/portieri.txt", "r") 
@@ -2372,13 +2376,13 @@ def main():
                 print(colored("Portieri già presenti.",'red'))
                 input("Premere invio per continuare")
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 continue
             os.system('CLS')
             p(int(budget_tot),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="2":
             budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
             w_d=open("./src/difensori.txt", "r") 
@@ -2388,11 +2392,11 @@ def main():
                 print(colored("Difensori già presenti.",'red'))
                 input("Premere invio per continuare")
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 continue
             d(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="3":
             budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
             w_c=open("./src/centrocampisti.txt", "r") 
@@ -2402,7 +2406,7 @@ def main():
                 print(colored("Centrocampisti già presenti.",'red'))
                 input("Premere invio per continuare")
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 continue        
             c(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             os.system('CLS')
@@ -2415,12 +2419,12 @@ def main():
                 print(colored("Attaccanti già presenti, hai già completato il fanta.",'red'))
                 input("Premere invio per continuare")
                 os.system('CLS')
-                print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+                #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 continue
             a(int(crediti_rimasti),int(budg_portieri),int(budg_dif),int(budg_centr),int(budg_att))
             salvaTutto()
             os.system('CLS')
-            print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
 if __name__ == "__main__":
     main()
 
