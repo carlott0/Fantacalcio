@@ -2026,8 +2026,8 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     print("##############")
     print("PUNTA SU")
     print("1) VICARIO")
-    print("2) TERRACCIANO o DRAGOWSKI")
-    print("3) RADU I.")
+    print("2) GOLLINI")
+    print("3) DRAGOWSKI")
     print("###############")
     spesa=0
     j=1
