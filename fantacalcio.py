@@ -816,7 +816,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
         except:
             gf=0        
         if titolarieta>10 or gf>3:
-            prezzo_previsto=int(a*v*v+b*v+c)
+            prezzo_previsto=int(v)
             new_budg=budget_rimasto-prezzo_previsto# se troppo alto metti v
             if new_budg > da_comprare:
                 acquistati.append(d)
