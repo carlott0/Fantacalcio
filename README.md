@@ -6,7 +6,7 @@ Assistente guida per l'asta iniziale del fantacalcio.
 
 AGGIORNAMENTO:
 Puoi scaricare lo zip con l'eseguibile .exe direttamente da qui:
-https://www.mediafire.com/file/a7zi477oxqflxn5/FantaCalcio.zip/file
+https://www.mediafire.com/file/a7zi477oxqflxn5/Fantacalcio.zip/file
 
 Requirements:
 
