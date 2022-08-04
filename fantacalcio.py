@@ -479,6 +479,7 @@ def ottieniVal(ruoli,qa):
             prezzo_probabile=p
         ris.append(prezzo_probabile)
         i+=1
+
     return ris
 
         
@@ -513,14 +514,16 @@ def calcola_quotazioni():
         
         
         r=requests.get(link, headers=headers)
+        
         output = open('./excel/q.xlsx', 'wb')
         output.write(r.content)
         output.close()
+        
 
         
         
-        
         data = pd.read_excel("./excel/q.xlsx", header=1)
+
         new=pd.DataFrame()
         new['Id']=data['Id']
         new['R']=data['R']
@@ -531,9 +534,8 @@ def calcola_quotazioni():
         lista=ottieniVal(data['R'],data['Qt.A'])
         new['VAL']= pd.Series(lista)
         new.to_excel('./excel/Quotazioni_Fantacalcio.xlsx')
+
         os.remove('./excel/q.xlsx')
-        
-            
         return 0
     except:
         return 1
@@ -735,7 +737,8 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
             squadre.append(difensori[difensori['Nome'].str.contains(g.upper())]['Squadra'].values[0])
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
-   #print("Valore Reparto attuale:",valore)
+    #print("Valore Reparto attuale:",valore)
+    budget_rimasto=budget_rimasto-int(prezzo_probabile)
     if  budget_rimasto -da_comprare <= 0:# or budget_rimasto -da_comprare<=int(prezzo_probabile):
         ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
@@ -775,8 +778,50 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                 tit_risultato.append(titolarieta)
                 k+=1
         return 0,p,tit_risultato
+    i=0
+    tentativi=0
     while(len(acquistati)!=8):
         d=random.choice(ds)
+        i+=1
+        if i==200:
+            ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+            k=0 
+            while(k<da_comprare):
+                d=random.choice(ds)
+                if d not in acquistati and d not in giachiamati:
+                    
+                    prezzo=1
+                    budget_rimasto=new_budg-1
+                    try:
+                        with open("./indice/titolari.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if d in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                        if trovato==0:
+                            with open("./indice/riserve.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if d in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                        if trovato==0:
+                            tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                            tit=round(round(int(tit)/38,2)*100,2)
+                    except:
+                        tit=1
+                    titolarieta=int(tit)
+                    tit_risultato.append(titolarieta)
+                    k+=1
+                    acquistati.append(d)
+                    giachiamati.append(d)
+            return 0,p,tit_risultato
+        ############
         if d.upper() in acquistati or d.upper() in giachiamati:
             continue
         try:
@@ -802,9 +847,17 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                 tit=round(round(int(tit)/38,2)*100,2)
         except:
             tit=0
-
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[0])
+            if len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values)==1:
+                v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[0])
+            else:#omonimi
+                z=0
+                l=len(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Nome'].values)
+                while(z<l):
+                    if (quotazioni[quotazioni['Nome'].str.contains(d.upper())]['Nome'].values[z])==d.upper():
+                        v=int(quotazioni[quotazioni['Nome'].str.contains(d.upper())]['VAL'].values[z])
+                        break
+                    z+=1
         except:
             v=1
         if int(tit)==0 and v<10:#evito che giocatori nuovi e forti non vengano considerati
@@ -814,7 +867,7 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
             gf=(t[t['Nome'].str.contains(d.upper())]['Gf'].values[0])
         except:
             gf=0        
-        if titolarieta>10 or gf>3:
+        if titolarieta>60 or gf>3:
             prezzo_previsto=int(v)
             new_budg=budget_rimasto-prezzo_previsto
             if new_budg > da_comprare:
@@ -865,7 +918,47 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
             else:
                 continue
         else:
-            continue
+            tentativi+=1 
+            
+            if tentativi > 200:
+
+                ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+                k=0 
+                while(k<da_comprare):
+                    d=random.choice(ds)
+                    if d not in acquistati and d not in giachiamati:
+                        
+                        prezzo=1
+                        budget_rimasto=new_budg-1
+                        try:
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if d in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if d in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)
+                        except:
+                            tit=1
+                        titolarieta=int(tit)
+                        tit_risultato.append(titolarieta)
+                        k+=1
+                        acquistati.append(d)
+                        giachiamati.append(d)
+                return 0,p,tit_risultato
     return 0,p,tit_risultato
 def difensori(u,budget):
     i=1
@@ -873,7 +966,7 @@ def difensori(u,budget):
     reparto_finale={}
     new_acquisti=[]
     valore_prima=0
-    valori=[]
+    #valori=[]
     giachiamati=[]
     valore_reparto=0
 
@@ -905,8 +998,8 @@ def difensori(u,budget):
         for el in reparto_finale.keys():
             buff+=el+" "
         print("Reparto Attuale:",buff)
-        for el in valori:
-            valore_reparto+=el/(len(acquistati)+1)
+        #for el in valori:
+        #    valore_reparto+=el/(len(reparto_finale.keys())+1)
         print("#"+str(i))
         
         giocatore=input("Difensore ").upper()
@@ -950,9 +1043,11 @@ def difensori(u,budget):
             acquistati.append(el)
         acquistati.append(giocatore)
         ok,prezzo,tit_risultato=dif(giocatore,acquistati,budget,giachiamati)
+        rz=0
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
+                rz=1
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
@@ -1064,25 +1159,33 @@ def difensori(u,budget):
         print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
 
-        valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if int((valore_temp-valore_prima)*100) >150:
+        # valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
+        # if int((valore_temp-valore_prima)*100) >150:
         
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
-        elif int((valore_temp-valore_prima)*100) >100:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
-        else:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        # elif int((valore_temp-valore_prima)*100) >100:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
+        # else:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
         if prezzo>budget-(8-len(new_acquisti)) or int(px)>budget:
             print(colored(("Mmm, costa tanto, circa ",int(px)),'yellow'))
 
-        elif valore_temp > valore_prima and tx>55:
-            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
-            print("Probabile prezzo d'asta: circa",int(px))
+        elif tx>55:
+            if rz==0:
+                print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+                print("Probabile prezzo d'asta: circa",int(px))
+            else:
+                t=int(px)+5
+                print(colored(("RIGORISTA, prezzo più alto: acquistalo ma al massimo spendi:",t),'green'))
+                print("Probabile prezzo d'asta: circa",t)
         else:
-            print(colored("Non acquistarlo.",'red'))
+            if rz==0:
+                print(colored("Non acquistarlo.",'red'))
+            else:
+                print(colored(("Puoi acquistarlo solo perché possibile rigorista, non spendere molto, al massimo",int(px)),'yellow'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere invio) ")
         if len(quanto)==0:
 
             acquistati=[]
@@ -1094,8 +1197,8 @@ def difensori(u,budget):
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u-=int(quanto)
-                valori.append(prezzo)
-                valore_prima=valore_temp
+                #valori.append(prezzo)
+                #valore_prima=valore_temp
                 new_acquisti.append(giocatore)
                 i+=1
             acquistati=[]
@@ -1140,6 +1243,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
             valore_reparto+=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['Qt. A'].values[0])
         valore=round(valore_reparto/len(acquistati),0)
     #print("Valore Reparto attuale:",valore)
+    budget_rimasto=budget_rimasto-int(prezzo_probabile)
     if  budget_rimasto -da_comprare <= 0:
         cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
@@ -1182,8 +1286,51 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                 tit_risultato.append(titolarieta)
                 k+=1
         return 0,p,tit_risultato
+    
+    i=0
+    tentativi=0
     while(len(acquistati)!=8):
         cx=random.choice(cs)
+        i+=1
+        if i==200:
+            cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+            k=0 
+            while(k<da_comprare):
+                cx=random.choice(cs)
+                if cx not in acquistati and cx not in giachiamati:
+                    
+                    prezzo=1
+                    budget_rimasto=new_budg-1
+                    try:
+                        with open("./indice/titolari.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if cx in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                        if trovato==0:
+                            with open("./indice/riserve.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if cx in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                        if trovato==0:
+                            tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                            tit=round(round(int(tit)/38,2)*100,2)
+                    except:
+                        tit=1
+                    titolarieta=int(tit)
+                    tit_risultato.append(titolarieta)
+                    k+=1
+                    acquistati.append(cx)
+                    giachiamati.append(cx)
+            return 0,p,prezzo_ritorno,tit_risultato
+        ############
         if cx.upper() in acquistati or cx.upper() in giachiamati:
             
             continue
@@ -1212,9 +1359,18 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
             tit=0          
 
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['VAL'].values[0])
+            if len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['VAL'].values)==1:
+                v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['VAL'].values[0])
+            else:#omonimi
+                z=0
+                l=len(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Nome'].values)
+                while(z<l):
+                    if (quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Nome'].values[z])==cx.upper():
+                        v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values[z])
+                        break
+                    z+=1
         except:
-            v=1 
+            v=1
         if int(tit)==0 and v<20:#evito che giocatori nuovi e forti non vengano considerati
             continue
             
@@ -1277,15 +1433,56 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
             else:
                 continue
         else:
-            continue
-    return 0,p,tit_risultato
+            tentativi+=1 
+            
+            if tentativi > 200:
+
+                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+                k=0 
+                while(k<da_comprare):
+                    cx=random.choice(cs)
+                    if cx not in acquistati and cx not in giachiamati:
+                        
+                        prezzo=1
+                        budget_rimasto=new_budg-1
+                        try:
+                            with open("./indice/titolari.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if cx in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                            if trovato==0:
+                                with open("./indice/riserve.txt","r") as r:
+                                    l=r.readlines()
+                                r.close()
+                                for el in l:
+                                    if cx in el:
+                                        tit=el.split(":")[1].replace("%","")
+                                        trovato=1
+                                        break
+                            if trovato==0:
+                                tit=(t[t['Nome'].str.contains(cx.upper())]['Pg'].values[0])
+                                tit=round(round(int(tit)/38,2)*100,2)
+                        except:
+                            tit=1
+                        titolarieta=int(tit)
+                        tit_risultato.append(titolarieta)
+                        k+=1
+                        acquistati.append(cx)
+                        giachiamati.append(cx)
+                return 0,p,prezzo_ritorno,tit_risultato
+    return 0,p,prezzo_ritorno,tit_risultato
+    
 def centrocampisti(u,budget):
     i=1
     acquistati=[]
     reparto_finale={}
     new_acquisti=[]
     valore_prima=0
-    valori=[]
+    #valori=[]
     valore_reparto=0
     giachiamati=[]
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
@@ -1335,8 +1532,8 @@ def centrocampisti(u,budget):
             buff+=el+" "
         print("Reparto Attuale:",buff)
 
-        for el in valori:
-            valore_reparto+=el/(len(acquistati)+1)
+        #for el in valori:
+        #    valore_reparto+=el/(len(reparto_finale.keys())+1)
         print("#"+str(i))
         giocatore=input("Centrocampista ").upper()
         if len(giocatore)<3:
@@ -1375,9 +1572,11 @@ def centrocampisti(u,budget):
             acquistati.append(el)
         acquistati.append(giocatore)
         ok,prezzo,tit_risultato=centr(giocatore,acquistati,budget, giachiamati)
+        rz=0
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
+                rz=1
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
@@ -1466,24 +1665,33 @@ def centrocampisti(u,budget):
         lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","","",""])
         print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
-        valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if int((valore_temp-valore_prima)*100) >150:
+        #valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
+        # print("",valore_temp)
+        # if int((valore_temp-valore_prima) >3:
         
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
-        elif int((valore_temp-valore_prima)*100) >100:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
-        else:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        # elif int((valore_temp-valore_prima)*100) >100:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
+        # else:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
         if prezzo>budget-(8-len(new_acquisti)) or px>budget:
             print(colored(("Mmm, costa tanto, circa ",int(px)),'yellow'))
-        elif valore_temp > valore_prima and tx > 55:
-            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
-            print("Probabile prezzo d'asta: circa",int(px))
+        elif tx>55:
+            if rz==0:
+                print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+                print("Probabile prezzo d'asta: circa",int(px))
+            else:
+                t=int(px)+5
+                print(colored(("RIGORISTA, prezzo più alto: acquistalo ma al massimo spendi:",t),'green'))
+                print("Probabile prezzo d'asta: circa",t)
         else:
-            print(colored("Non acquistarlo.",'red'))
+            if rz==0:
+                print(colored("Non acquistarlo.",'red'))
+            else:
+                print(colored(("Puoi acquistarlo solo perché possibile rigorista, non spendere molto, al massimo",int(px)),'yellow'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere invio) ")
         if len(quanto)==0:
 
             acquistati=[]
@@ -1496,8 +1704,8 @@ def centrocampisti(u,budget):
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u-=int(quanto)
-                valori.append(prezzo)
-                valore_prima=valore_temp
+                #valori.append(int(quanto))
+                #valore_prima=valore_temp
                 new_acquisti.append(giocatore.upper())
                 i+=1
             acquistati=[]
@@ -1542,11 +1750,14 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     valore_reparto=0
     valore=0
     
-
-
+    budget_rimasto=budget_rimasto-int(prezzo_probabile)
+    i=0
     if  budget_rimasto -da_comprare <= 0:
         ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
         for k in range(0,da_comprare):
+            if i>250:
+                return 0,p,prezzo_ritorno,tit_risultato
+            i+=1
             ax=random.choice(ass)
             if ax.upper() not in acquistati and ax.upper() not in giachiamati:
                 acquistati.append(ax)
@@ -1597,22 +1808,75 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     except:
         titolari=[]
     i=0
+    
     while(len(acquistati)!=6):
         ax=random.choice(ass)
-        #try:
-        #    ax=ass[i]
-        #except:
-        #    ax=random.choice(ass)
-        
-        ############
         try:
-            v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values[0])
+            ax=ass[i]
+        except:
+            ax=random.choice(ass)
+        i+=1
+        
+        
+        if i==200:
+            ass=list(quotazioni.loc[(quotazioni['R'] == 'A') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
+            k=0 
+            while(k<da_comprare):
+                ax=random.choice(ass)
+                if ax not in acquistati and ax not in giachiamati:
+                    
+                    prezzo=1
+                    budget_rimasto=new_budg-1
+                    try:
+                        with open("./indice/titolari.txt","r") as r:
+                            l=r.readlines()
+                        r.close()
+                        for el in l:
+                            if ax in el:
+                                tit=el.split(":")[1].replace("%","")
+                                trovato=1
+                                break
+                        if trovato==0:
+                            with open("./indice/riserve.txt","r") as r:
+                                l=r.readlines()
+                            r.close()
+                            for el in l:
+                                if ax in el:
+                                    tit=el.split(":")[1].replace("%","")
+                                    trovato=1
+                                    break
+                        if trovato==0:
+                            tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
+                            tit=round(round(int(tit)/38,2)*100,2)
+                    except:
+                        tit=1
+                    titolarieta=int(tit)
+                    tit_risultato.append(titolarieta)
+                    k+=1
+                    acquistati.append(ax)
+                    giachiamati.append(ax)
+            return 0,p,prezzo_ritorno,tit_risultato
+        ############
+        
+        try:
+            if len(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values)==1:
+                v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values[0])
+            else:#omonimi
+                z=0
+                l=len(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Nome'].values)
+                while(z<l):
+                    if (quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['Nome'].values[z])==ax.upper():
+                        v=int(quotazioni[quotazioni['Nome'].str.contains(ax.upper())]['VAL'].values[z])
+                        break
+                    z+=1
         except:
             v=1
-            
+
+        
         
         if budget_rimasto-v-da_comprare<=0:
             continue
+
         try:
             for el in titolari:
                 if ax in el:
@@ -1710,7 +1974,7 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                                 l=r.readlines()
                             r.close()
                             for el in l:
-                                if d in el:
+                                if ax in el:
                                     tit=el.split(":")[1].replace("%","")
                                     trovato=1
                                     break
@@ -1719,12 +1983,12 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                                     l=r.readlines()
                                 r.close()
                                 for el in l:
-                                    if d in el:
+                                    if ax in el:
                                         tit=el.split(":")[1].replace("%","")
                                         trovato=1
                                         break
                             if trovato==0:
-                                tit=(t[t['Nome'].str.contains(d.upper())]['Pg'].values[0])
+                                tit=(t[t['Nome'].str.contains(ax.upper())]['Pg'].values[0])
                                 tit=round(round(int(tit)/38,2)*100,2)
                         except:
                             tit=1
@@ -1741,7 +2005,7 @@ def attaccanti(u,budget):
     reparto_finale={}
     new_acquisti=[]
     valore_prima=0
-    valori=[]
+    #valori=[]
     giachiamati=[]
     valore_reparto=0
     quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
@@ -1793,9 +2057,10 @@ def attaccanti(u,budget):
         for el in reparto_finale.keys():
             buff+=el+" "
         print("Reparto Attuale:",buff)
-        for el in valori:
-            valore_reparto+=el/(len(acquistati)+1)
+        #for el in valori:
+        #    valore_reparto+=el/(len(reparto_finale.keys())+1)
         print("#"+str(i))
+        
         giocatore=input("Attaccante ").upper()
         if len(giocatore)<3:
             print(colored("Inserire almeno 3 caratteri.",'red'))
@@ -1834,9 +2099,11 @@ def attaccanti(u,budget):
             acquistati.append(el)
         acquistati.append(giocatore)
         ok,prezzo,pr,tit_risultato=att(giocatore,acquistati,budget, giachiamati)
+        rz=0
         for el in lista:
             if giocatore.upper().strip()==el.strip():
                 print(colored("Probabile rigorista",'green'))
+                rz=1
         print("Possibile squadra:")
         #print("Nome\t\tPrezzo\t\tGol scorso anno\t\tTitolarietà")
         lista_print=[[]]
@@ -1919,25 +2186,32 @@ def attaccanti(u,budget):
         lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx/len(acquistati)))+"%","","","","",""])
         print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
-        valore_temp=(valore_reparto+prezzo)/(len(acquistati)+1)
-        if int((valore_temp-valore_prima)*100) >150:
+        # valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
+        # if int((valore_temp-valore_prima)*100) >150:
         
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
-        elif int((valore_temp-valore_prima)*100) >100:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
-        else:
-            print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'green'))
+        # elif int((valore_temp-valore_prima)*100) >100:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'yellow'))
+        # else:
+            # print(colored((int((valore_temp-valore_prima)*100),"% qualità alla squadra."),'red'))
 
         if prezzo>budget-(6-len(new_acquisti)) or int(px)>budget:
             print(colored(("Mmm, costa tanto, circa ",pr),'yellow'))
-        elif valore_temp > valore_prima or tx > 50:
-            
-            print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
-            print("Probabile prezzo d'asta: circa",int(px))
+        elif tx>55:
+            if rz==0:
+                print(colored(("Si acquistalo ma al massimo spendi:",int(px)),'green'))
+                print("Probabile prezzo d'asta: circa",int(px))
+            else:
+                t=int(px)+5
+                print(colored(("RIGORISTA, prezzo più alto: acquistalo ma al massimo spendi:",t),'green'))
+                print("Probabile prezzo d'asta: circa",t)
         else:
-            print(colored("Non acquistarlo.",'red'))
+            if rz==0:
+                print(colored("Non acquistarlo.",'red'))
+            else:
+                print(colored(("Puoi acquistarlo solo perché possibile rigorista, non spendere molto, al massimo",int(px)),'yellow'))
         valore_reparto=0
-        quanto=input("Se lo hai comprato, a quanto? (se no premere 0 o invio) ")
+        quanto=input("Se lo hai comprato, a quanto? (se no premere invio) ")
         if len(quanto)==0:
 
             acquistati=[]
@@ -1949,8 +2223,8 @@ def attaccanti(u,budget):
                 reparto_finale[giocatore]=quanto
                 budget=budget-int(quanto)
                 u=u-int(quanto)
-                valori.append(prezzo)
-                valore_prima=valore_temp
+                #valori.append(prezzo)
+                #valore_prima=valore_temp
                 new_acquisti.append(giocatore.upper())
                 giachiamati.append(giocatore.upper())
                 i+=1
@@ -1965,7 +2239,7 @@ def attaccanti(u,budget):
 def a(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     if budg_att> budget_tot:
         budg_att=budget_tot
-    reparto=attaccanti(budget_tot,budg_att)
+    reparto=attaccanti(budget_tot,budg_att)#budget_tot)
     print(reparto)
     w_d=open("./src/attaccanti.txt", "w")
     spesa=0
