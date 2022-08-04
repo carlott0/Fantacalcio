@@ -46,12 +46,12 @@ def getInfortunati():
     if not path.exists("./infortunii/"):
         os.makedirs("./infortunii/")
     with open("./infortunii/infortunati.txt","w") as w:
-        for el in infortunati:
+        for el in list(np.unique(infortunati)):
             w.write(el)
             w.write("\n")
     w.close()
     with open("./infortunii/squalificati.txt","w") as w:
-        for el in squalificati:
+        for el in list(np.unique(squalificati)):
             w.write(el)
             w.write("\n")
     w.close()    
@@ -695,8 +695,8 @@ def genera_portieri(scelta):
     #rispetto casa e diff partita
     new_diz={k: v for k, v in diz.items() if v}
     ret_diz={k: v for k, v in sorted(new_diz.items(), key=lambda item: int(item[1]),reverse=True)}
-    d_5 = [v for v in list(ret_diz.keys())[:20]]
-    m_5 = [v for v in list(new_diz.keys())[:20]]
+    d_5 = [v for v in list(ret_diz.keys())[:30]]
+    m_5 = [v for v in list(new_diz.keys())[:30]]
     if scelta==1:
         return d_5
     elif scelta==2:
@@ -1176,7 +1176,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                     v=int(quotazioni[quotazioni['Nome'].str.contains(cx.upper())]['Qt. A'].values[0])
                 except:
                     v=1
-                budget_rimasto=budget_rimasto-v
+                budget_rimasto=budget_rimasto-1
 
                 titolarieta=int(tit)
                 tit_risultato.append(titolarieta)
@@ -1185,6 +1185,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
     while(len(acquistati)!=8):
         cx=random.choice(cs)
         if cx.upper() in acquistati or cx.upper() in giachiamati:
+            
             continue
         try:
             with open("./indice/titolari.txt","r") as r:
@@ -1216,12 +1217,14 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
             v=1 
         if int(tit)==0 and v<20:#evito che giocatori nuovi e forti non vengano considerati
             continue
+            
         titolarieta=int(tit)
         try:
             gf=(t[t['Nome'].str.contains(cx.upper())]['Gf'].values[0])
         except:
-            gf=0        
-        if titolarieta>10 or gf>3:
+            gf=0     
+        
+        if titolarieta>60 or gf>3:
             prezzo_previsto=int(v)
             new_budg=budget_rimasto-prezzo_previsto#v
             if new_budg > da_comprare:
@@ -1233,8 +1236,8 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                 cs=list(quotazioni.loc[(quotazioni['R'] == 'C')]['Nome'].values)#& ((quotazioni['Qt. A'])< 5)
                 if cx in cs:
                     cs.remove(cx)
-            if budget_rimasto <= da_comprare:
-                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A']) < budget_rimasto)]['Nome'].values)
+            if new_budg <= da_comprare:
+                cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & ((quotazioni['Qt. A']) < 5)]['Nome'].values)
                 k=0
                 while(k <da_comprare):
                     cx=random.choice(cs)
@@ -1640,7 +1643,7 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
             continue
         
 
-        if  (titolarieta>10  or gf>5 or v>50 )   and not (ax.upper() in acquistati or ax.upper() in giachiamati) :
+        if  (titolarieta>60  or gf>5 or v>50 )   and not (ax.upper() in acquistati or ax.upper() in giachiamati) :
             
             new_budg=budget_rimasto-prezzo_previsto
             if new_budg > da_comprare:
@@ -2033,12 +2036,12 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     print("BUDGET PORTIERI:",budg_portieri)
     print("Lista portieri migliori a seconda del calendario: fattore casa e difficoltà partita:")
     print(genera_portieri(1))
-    print("##############")
-    print("PUNTA SU")
-    print("1) VICARIO")
-    print("2) GOLLINI")
-    print("3) DRAGOWSKI")
-    print("###############")
+    #print("##############")
+    #print("PUNTA SU")
+    #print("1) VICARIO")
+    #print("2) GOLLINI")
+    #print("3) DRAGOWSKI")
+    #print("###############")
     spesa=0
     j=1
     while(j<4):
@@ -2103,6 +2106,7 @@ def salvaTutto():
         w_f.write(el)
         w_f.write("\n")        
     w_f.close()
+    print(colored("Squadra salvata correttamente sul file SQUADRAFINALE.txt.",'green'))
 def salvasuFile(tot,rimasti,port,dif,centr,att):
     t=str(tot)
     r=str(rimasti)
