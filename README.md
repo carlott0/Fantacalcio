@@ -33,7 +33,7 @@ A default i portieri su 500 crediti costano il 3%, ovvero 15 crediti, i difensor
 Per avviare il programma eseguire il comando python3 fantacalcio.py e seguire le istruzioni che seguono di volta in volta. Il progamma ogni volta che viene chiamato un giocatore crea un possibile reparto e dice il prezzo probabile di quel giocatore, oltre a altri dati come i gol fatti l'anno precedente, l'indice di titolarietà e se si tratta di un rigorista.
 ![test5](https://user-images.githubusercontent.com/49305804/181827213-6a3eaca4-9647-476b-ad72-240170dd948b.png)
 
-La cartella 'old lega' contiene gli excel con i valori del mio fanta della scorsa asta, per ogni reparto contiene il prezzo di partenza e il prezzo a cui è andato ogni giocatore. Viene poi usato per migliorare la stima del prezzo dei giocatori di quest'anno. Se non si vuole usare questa funzione cancellare semplicemente la cartella 'old lega'. 
+
 ![test4](https://user-images.githubusercontent.com/49305804/181827204-32548b52-117e-4143-bc03-4f73b1781512.png)
 
 
