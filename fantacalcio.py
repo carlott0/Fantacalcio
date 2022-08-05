@@ -460,7 +460,16 @@ def ottieniVal(ruoli,qa):
         a1 = [1,5,10,15,20,25,30,35,40,45]
         a2 = [1,10,30,40,50,70,110,140,160,200]
     
+    try:
+        w=pd.read_excel("./Funzioni Prezzo/portieri.txt", names=['Valore Nominale','Prezzo Asta'])
+        p1=w['Valore Nominale']
+        p2=w['Prezzo Asta']
+    except:
+        p1 = [1,5,10,15,20,25]
+        p2 = [1,10,15,30,40,45]
+    
 
+    
     
     
     ris=[]
@@ -476,7 +485,8 @@ def ottieniVal(ruoli,qa):
             a,b,c = np.polyfit(a1, a2, 2)
             prezzo_probabile=int(a*p*p+b*p+c)
         else:
-            prezzo_probabile=p
+            a,b,c = np.polyfit(p1, p2, 2)
+            prezzo_probabile=int(a*p*p+b*p+c)
         ris.append(prezzo_probabile)
         i+=1
 
@@ -669,19 +679,26 @@ def por(g1,g2, classifica, d_giocatori, d_calendario):
                 casa=0
                 sq2=0
                 break
-    ris=d_giocatori[d_giocatori['Nome'].str.contains(g1.upper())]['Mv'].item()+d_giocatori[d_giocatori['Nome'].str.contains(g2.upper())]['Mv'].item()
+    ris=d_giocatori[d_giocatori['Nome'].str.contains(g1.upper())]['Qt. A'].values[0]+d_giocatori[d_giocatori['Nome'].str.contains(g2.upper())]['Qt. A'].values[0]
     return str(tot)+";"+str(ris)
 def genera_portieri(scelta):
     diz={}
     classifica=list(pd.read_excel("./excel/classifica.xlsx")['SQUADRE'])
-    d_giocatori=pd.read_excel("./excel/giocatori.xlsx")
+    #d_giocatori=pd.read_excel("./excel/giocatori.xlsx")
+    d_giocatori=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
     d_giocatori['Nome'] = d_giocatori['Nome'].apply(lambda nome : nome.upper())
-
+    
     d_calendario=pd.read_excel("./excel/calendario.xlsx")
-    p=list(d_giocatori.loc[(d_giocatori['R'] == 'P')]['Nome'].values)#&(d_giocatori['Pg'] > 1)
+    q=list(d_giocatori.loc[(d_giocatori['R'] == 'P') & (d_giocatori['Qt. A'] >1)]['Nome'].values)
+    
+    
+    
     portieri=[]
-    for el in p:
+
+
+    for el in q:
         portieri.append(el.upper())
+
     voti={}
     for i in np.arange(len(portieri)):
         x= portieri[i]
@@ -697,8 +714,8 @@ def genera_portieri(scelta):
     #rispetto casa e diff partita
     new_diz={k: v for k, v in diz.items() if v}
     ret_diz={k: v for k, v in sorted(new_diz.items(), key=lambda item: int(item[1]),reverse=True)}
-    d_5 = [v for v in list(ret_diz.keys())[:30]]
-    m_5 = [v for v in list(new_diz.keys())[:30]]
+    d_5 = [v for v in list(ret_diz.keys())[:15]]
+    m_5 = [v for v in list(new_diz.keys())[:15]]
     if scelta==1:
         return d_5
     elif scelta==2:
@@ -2298,7 +2315,7 @@ def d(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Centr:",budg_centr-abs(budg_dif-spesa))
         print("Att:",budg_att+(budg_dif-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr-abs(budg_dif-spesa),budg_att+(budg_dif-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr,budg_att+(budg_dif-spesa))
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_dif-spesa))
         print("Cent:",budg_centr)
@@ -2309,7 +2326,8 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     w_p=open("./src/portieri.txt", "w")
     print("BUDGET PORTIERI:",budg_portieri)
     print("Lista portieri migliori a seconda del calendario: fattore casa e difficoltà partita:")
-    print(genera_portieri(1))
+    portieri_buoni=genera_portieri(1)
+    
     #print("##############")
     #print("PUNTA SU")
     #print("1) VICARIO")
@@ -2318,9 +2336,66 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     #print("###############")
     spesa=0
     j=1
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
+    portieri_presi={}
+    quotazioni=quotazioni.loc[(quotazioni['R']=='P')]
+    lista_print=[[]]
     while(j<4):
-        
-        p=input("Inserire il portiere #"+str(j)+":")
+        os.system('CLS')
+        print("BUDGET PORTIERI:",budg_portieri)
+        print("N. portieri da acquistare: ",3-len(portieri_presi.keys()))
+        print("Portieri acquistati: ")
+        b=""
+        for el in portieri_presi.keys():
+            b+=el+"\t"+portieri_presi[el]+"\n"
+        print(b)
+        print("Lista portieri migliori a seconda del calendario: fattore casa e difficoltà partita:")
+        i=0
+        migliore=[[]]
+        s=100
+        for portiere in portieri_buoni:
+            p1=portiere.split("-")[0].strip().upper()
+            p2=portiere.split("-")[1].strip().upper()
+            
+            squadra_1=quotazioni[quotazioni['Nome'].str.contains(p1.upper())]['Squadra'].values[0]
+            squadra_2=quotazioni[quotazioni['Nome'].str.contains(p2.upper())]['Squadra'].values[0]
+            
+            pr_1=quotazioni[quotazioni['Nome'].str.contains(p1.upper())]['Qt. A'].values[0]
+            pr_2=quotazioni[quotazioni['Nome'].str.contains(p2.upper())]['Qt. A'].values[0]
+            
+            pr_1_prob=quotazioni[quotazioni['Nome'].str.contains(p1.upper())]['VAL'].values[0]
+            pr_2_prob=quotazioni[quotazioni['Nome'].str.contains(p2.upper())]['VAL'].values[0]            
+            
+            somma=int(pr_1_prob)+int(pr_2_prob)
+            lista_print.append([p1,squadra_1,pr_1,pr_1_prob,p2,squadra_2,pr_2,pr_2_prob,str(somma)])
+            if somma<s:
+                s=somma
+                migliore=([p1,squadra_1,pr_1,pr_1_prob,p2,squadra_2,pr_2,pr_2_prob,str(somma)])
+            
+        lista_print.append(["","","","","","","","",""])
+        lista_print.append(["Coppia Migliore:","","","","","","","",""])
+        lista_print.append(migliore)        
+        print(tabulate(lista_print, headers=["Portiere 1", "Squadra 1","Prezzo Previsto 1","Prezzo Probabile 1", "Portiere 2","Squadra 2","Prezzo Previsto 2","Prezzo Probabile 2","Prezzo Totale"]))
+
+        lista_print.clear()
+        #print(portieri_buoni)
+        p=input("Inserire il portiere #"+str(j)+": ")
+        trovato=0
+        for g in quotazioni['Nome']:
+            if p.upper().strip() == g.upper().strip():
+                trovato=1
+                break
+        if trovato==0:
+            gx=calcola_giocatore_simile(p.upper().strip(),quotazioni)
+            if len(gx)==0:
+                print("Nessun giocatore trovato, riprova.")
+                continue
+            print(colored(("Nessun giocatore con questo nome, forse si intendeva", gx,"?[Y,n]"),'red'))
+            scelta=input()
+            if scelta!="Y" and len(scelta)!=0 and scelta!="y":
+                continue
+            p=gx
         prezzi=input("Inserire i crediti spesi: ")
         
         try:
@@ -2333,8 +2408,12 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         w_p.write("\n")
         spesa+=int(prezzi)
         j+=1
-    
-    
+        portieri_presi[p]=prezzi
+    print("Reparto Finale:")
+    for el in portieri_presi.keys():
+        b=el+"\t"+portieri_presi[el]
+        print(b)
+    print("")
     if spesa> int(budg_portieri):
         print("Hai speso troppo, verranno scalati crediti sui difensori.")
         print("Crediti spesi in più:",abs(budg_portieri-spesa))
@@ -2342,7 +2421,7 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Cent:",budg_centr)
         print("Att:",budg_att+(budg_portieri-spesa))
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif-abs(budg_portieri-spesa),budg_centr,budg_att+(budg_portieri-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif,budg_centr,budg_att+(budg_portieri-spesa))
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_portieri-spesa))
         print("Dif:",budg_dif)
@@ -2658,6 +2737,7 @@ def main():
         print("2) Genera difensori")
         print("3) Genera centrocampisti")
         print("4) Genera attaccanti")
+        print("Scrivere il numero del reparto [1,2,3,4] e premere Invio.")
         with open("./src/crediti.txt", "r") as fin:
             linee=fin.readlines()
         crediti_rimasti=linee[1].split("=")[1].split("\n")[0]
