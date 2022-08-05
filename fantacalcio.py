@@ -2341,6 +2341,12 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     portieri_presi={}
     quotazioni=quotazioni.loc[(quotazioni['R']=='P')]
     lista_print=[[]]
+    try:
+        with open("./categorie/portieri.json","r") as r:
+            data = json.load(r)
+        r.close() 
+    except:
+        data={}
     while(j<4):
         os.system('CLS')
         print("BUDGET PORTIERI:",budg_portieri)
@@ -2357,7 +2363,20 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         for portiere in portieri_buoni:
             p1=portiere.split("-")[0].strip().upper()
             p2=portiere.split("-")[1].strip().upper()
-            
+            cat_1="-"
+            trovato=0
+            for categoria in data.keys():
+                if p1.upper() in str(data[categoria]).upper():
+                    cat_1=categoria
+                if trovato==1:
+                    break
+            cat_2="-"
+            trovato=0
+            for categoria in data.keys():
+                if p2.upper() in str(data[categoria]).upper():
+                    cat_2=categoria
+                if trovato==1:
+                    break
             squadra_1=quotazioni[quotazioni['Nome'].str.contains(p1.upper())]['Squadra'].values[0]
             squadra_2=quotazioni[quotazioni['Nome'].str.contains(p2.upper())]['Squadra'].values[0]
             
@@ -2368,15 +2387,15 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
             pr_2_prob=quotazioni[quotazioni['Nome'].str.contains(p2.upper())]['VAL'].values[0]            
             
             somma=int(pr_1_prob)+int(pr_2_prob)
-            lista_print.append([p1,squadra_1,pr_1,pr_1_prob,p2,squadra_2,pr_2,pr_2_prob,str(somma)])
+            lista_print.append([p1,squadra_1,cat_1,pr_1,pr_1_prob,p2,squadra_2,cat_2,pr_2,pr_2_prob,str(somma)])
             if somma<s:
                 s=somma
-                migliore=([p1,squadra_1,pr_1,pr_1_prob,p2,squadra_2,pr_2,pr_2_prob,str(somma)])
+                migliore=([p1,squadra_1,cat_1,pr_1,pr_1_prob,p2,squadra_2,cat_2,pr_2,pr_2_prob,str(somma)])
             
         lista_print.append(["","","","","","","","",""])
         lista_print.append(["Coppia Migliore:","","","","","","","",""])
         lista_print.append(migliore)        
-        print(tabulate(lista_print, headers=["Portiere 1", "Squadra 1","Prezzo Previsto 1","Prezzo Probabile 1", "Portiere 2","Squadra 2","Prezzo Previsto 2","Prezzo Probabile 2","Prezzo Totale"]))
+        print(tabulate(lista_print, headers=["Portiere 1", "Squadra 1","Categoria 1","Prezzo 1","Prezzo Prob 1", "Portiere 2","Squadra 2","Categoria 2","Prezzo 2","Prezzo Prob 2","Prezzo Totale"]))
 
         lista_print.clear()
         #print(portieri_buoni)
@@ -2519,12 +2538,11 @@ def generaCategorie():
     
     p=lista_portieri()
 
-    with open("./categorie/portieri.txt","w") as w:
-        w.write(str(p))
+    with open("./categorie/portieri.json","w") as w:
+        json.dump(p, w, indent=4)
     w.close()
     
     d=lista_difensori()
-
     with open("./categorie/difensori.json","w") as w:
         json.dump(d, w, indent=4)
     w.close()
@@ -2539,6 +2557,7 @@ def generaCategorie():
         json.dump(a, w, indent=4)
     w.close()
     
+
 
     
 def main():
