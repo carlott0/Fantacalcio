@@ -2907,8 +2907,11 @@ def main():
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="5":
             print("Ti ringrazio! Verrai reindirizzato fra qualche secondo al sito di paypal.")
-            time.sleep(3)
-            webbrowser.open(paypal)
+            try:
+                time.sleep(3)
+                webbrowser.open(paypal)
+            except:
+                pass
             os.system('CLS')
             continue
 #if __name__ == "__main__":
