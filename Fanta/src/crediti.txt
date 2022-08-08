@@ -1,0 +1,6 @@
+crediti_iniziali=500
+crediti_rimasti=500
+crediti_portieri=15
+crediti_difensori=35
+crediti_centrocampisti=100
+crediti_attaccanti=350
