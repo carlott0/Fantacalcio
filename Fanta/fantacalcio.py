@@ -2587,7 +2587,6 @@ def main():
     os.system('color')
     #f = Figlet(font='slant')
     #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
-    print("Istruzioni all'interno della cartella Fanta\ReadMe.md")
     print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'cyan'))
     print(colored("Istruzioni all'interno della cartella Fanta\ReadMe exe.md",'cyan'))
     print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'cyan'))
