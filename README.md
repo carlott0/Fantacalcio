@@ -30,7 +30,7 @@ Ottimizzato per budget 500 crediti. Se si vogliono cambiare bisogna modificare i
 Nei file nella cartella src verranno salvati i giocatori comprati, nel file crediti.txt è possibile modificare i pesi di ogni ruolo, cioè i prezzi massimi che si vuole spendere per un reparto.
 A default i portieri su 500 crediti costano il 3%, ovvero 15 crediti, i difensori 35 su 500 (7%), i centrocampisti 100 su 500(20%), e gli attaccanti 350 su 500 (70%).
 
-Per avviare il programma eseguire il comando python3 fantacalcio.py e seguire le istruzioni che seguono di volta in volta. Il progamma ogni volta che viene chiamato un giocatore crea un possibile reparto e dice il prezzo probabile di quel giocatore, oltre a altri dati come i gol fatti l'anno precedente, l'indice di titolarietà e se si tratta di un rigorista.
+Per avviare il programma eseguire il comando python3 Fantacalcio.py e seguire le istruzioni che seguono di volta in volta. Il progamma ogni volta che viene chiamato un giocatore crea un possibile reparto e dice il prezzo probabile di quel giocatore, oltre a altri dati come i gol fatti l'anno precedente, l'indice di titolarietà e se si tratta di un rigorista.
 ![test5](https://user-images.githubusercontent.com/49305804/181827213-6a3eaca4-9647-476b-ad72-240170dd948b.png)
 
 
