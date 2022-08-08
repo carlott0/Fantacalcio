@@ -41,7 +41,7 @@ Per ogni giocatore che viene chiamato si consiglia di inserire il prezzo a cui v
 
 La cartella indice viene caricata dinamicamente all'inizio e contiene l'indice di titolarietà dei giocatori.
 
-La cartella categorie contiene le fasce in cui ogni giocatore si trova (manca da aggiornare gli attaccanti).
+La cartella categorie contiene le fasce in cui ogni giocatore si trova.
 La cartella infortunii contiene due file, in cui vi sono gli infortunati e gli squalificati (quest'ultimi viene indicato anche quante giornate).
 
 Ho vinto 2 fantacalci di fila con questo metodo, il primo era un fanta a 12 il secondo fanta a 10.
