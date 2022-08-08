@@ -16,7 +16,9 @@ from termcolor import colored
 import requests
 #from pyfiglet import Figlet
 import json
-
+import webbrowser
+import time
+paypal="https://www.paypal.com/paypalme/carlocontibellissimo"
 
 
 def getInfortunati():
@@ -1008,7 +1010,8 @@ def difensori(u,budget):
 
         #input("Premere Invio per continuare ")
         os.system('CLS')      
-     
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)
         print("Budget Totale:",u)
         print("Budget Reparto:",budget)
         buff=""
@@ -1017,9 +1020,9 @@ def difensori(u,budget):
         print("Reparto Attuale:",buff)
         #for el in valori:
         #    valore_reparto+=el/(len(reparto_finale.keys())+1)
-        print("#"+str(i))
+        #print("#"+str(i))
         
-        giocatore=input("Difensore ").upper()
+        giocatore=input("Difensore  "+str(i)+":" ).upper()
         if len(giocatore)<3:
             print("Inserire almeno 3 caratteri.")
             input("Premere Invio per continuare ")
@@ -1542,6 +1545,8 @@ def centrocampisti(u,budget):
        
 
         os.system('CLS')   
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)
         print("Budget Totale:",u)        
         print("Budget Reparto:",budget)
         buff=""
@@ -1551,8 +1556,8 @@ def centrocampisti(u,budget):
 
         #for el in valori:
         #    valore_reparto+=el/(len(reparto_finale.keys())+1)
-        print("#"+str(i))
-        giocatore=input("Centrocampista ").upper()
+        #print("#"+str(i))
+        giocatore=input("Centrocampista  "+str(i)+":" ).upper()
         if len(giocatore)<3:
             print(colored("Inserire almeno 3 caratteri.",'red'))
             input("Premere Invio per continuare ")
@@ -2067,7 +2072,9 @@ def attaccanti(u,budget):
     while(i!=7):
         
         #input("Premere Invio per continuare ")
-        os.system('CLS')        
+        os.system('CLS')      
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)        
         print("Budget Totale:",u)
         print("Budget Reparto:",budget)
         buff=""
@@ -2076,9 +2083,9 @@ def attaccanti(u,budget):
         print("Reparto Attuale:",buff)
         #for el in valori:
         #    valore_reparto+=el/(len(reparto_finale.keys())+1)
-        print("#"+str(i))
+        #print("#"+str(i))
         
-        giocatore=input("Attaccante ").upper()
+        giocatore=input("Attaccante "+str(i)+":" ).upper()
         if len(giocatore)<3:
             print(colored("Inserire almeno 3 caratteri.",'red'))
             input("Premere Invio per continuare ")
@@ -2349,6 +2356,9 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         data={}
     while(j<4):
         os.system('CLS')
+        print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)
         print("BUDGET PORTIERI:",budg_portieri)
         print("N. portieri da acquistare: ",3-len(portieri_presi.keys()))
         print("Portieri acquistati: ")
@@ -2556,10 +2566,7 @@ def generaCategorie():
     with open("./categorie/attaccanti.json","w") as w:
         json.dump(a, w, indent=4)
     w.close()
-    
 
-
-    
 def main():
     
     os.system('CLS')
@@ -2567,6 +2574,9 @@ def main():
     #f = Figlet(font='slant')
     #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
 
+    print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+    print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+    print("Indirizzo PayPal",paypal)
     print("Generazione file di sistema in corso, attendere...")
     try:
         if not path.exists("./src/"):
@@ -2604,6 +2614,9 @@ def main():
         exit()
     os.system('CLS')
     #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+    print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+    print("Indirizzo PayPal",paypal)    
     print(colored("Generazione file di sistema completata.",'green'))
     print("Lettura dei crediti disponibili...")
     budget_tot,crediti_rimasti,budg_portieri,budg_dif,budg_centr,budg_att=readCredito()
@@ -2611,6 +2624,9 @@ def main():
     
     os.system('CLS')
     #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+    print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+    print("Indirizzo PayPal",paypal)    
     print(colored("Generazione file di sistema completata.",'green'))
     print(colored("Lettura dei crediti disponibili completata",'green'))
     print("Aggiornamento listone...")
@@ -2619,6 +2635,9 @@ def main():
     ok2=0
     if r==0:
         os.system('CLS')
+        print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)
         #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         print(colored("Generazione file di sistema completata.",'green'))
         print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2626,6 +2645,9 @@ def main():
     else:
         os.system('CLS')
         #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+        print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+        print("Indirizzo PayPal",paypal)
         print(colored("Generazione file di sistema completata.",'green'))
         print(colored("Lettura dei crediti disponibili completata",'green'))    
         print(colored("Errore nell'aggiornamento del listone.",'red'))
@@ -2637,6 +2659,9 @@ def main():
     if r==0:
         if ok==0:
             os.system('CLS')
+            print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+            print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+            print("Indirizzo PayPal",paypal)            
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2645,12 +2670,18 @@ def main():
         else:
             os.system('CLS')
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+            print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+            print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+            print("Indirizzo PayPal",paypal)            
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
             print(colored("Errore nell'aggiornamento del listone.",'red'))
     else:
         if ok==0:
             os.system('CLS')
+            print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+            print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+            print("Indirizzo PayPal",paypal)            
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2659,6 +2690,9 @@ def main():
             ok2=1
         else:
             os.system('CLS')
+            print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+            print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+            print("Indirizzo PayPal",paypal)            
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
             print(colored("Generazione file di sistema completata.",'green'))
             print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2672,6 +2706,9 @@ def main():
         if ok==0:
             if ok2==0:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2680,6 +2717,9 @@ def main():
                 print(colored("Aggiornamento classifica completato.",'green'))
             else:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)                
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2689,6 +2729,9 @@ def main():
         else:
             if ok2==0:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2697,6 +2740,9 @@ def main():
                 print(colored("Aggiornamento classifica completato.",'green'))   
             else:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2708,6 +2754,9 @@ def main():
         if ok==0:
             if ok2==0:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)                
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2716,6 +2765,9 @@ def main():
                 print(colored("Errore nell'aggiornamento della classifica.",'red'))
             else:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)                
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2725,6 +2777,9 @@ def main():
         else:
             if ok2==0:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2733,6 +2788,9 @@ def main():
                 print(colored("Errore nell'aggiornamento della classifica.",'red'))   
             else:
                 os.system('CLS')
+                print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'blue'))
+                print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+                print("Indirizzo PayPal",paypal)
                 #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
                 print(colored("Generazione file di sistema completata.",'green'))
                 print(colored("Lettura dei crediti disponibili completata",'green'))
@@ -2747,21 +2805,27 @@ def main():
     if not path.exists("./excel/calendario.xlsx") or not path.exists("./excel/giocatori.xlsx") or not path.exists("./excel/Quotazioni_Fantacalcio.xlsx") or not path.exists("./excel/classifica.xlsx"):
         ris=genera_excel()
         if ris!="OK":
+        
             print(colored("Errore imprevisto, termino.",'red'))
             exit()
     print(colored("I file sono a posto.",'green'))
+    primo=0
     while(True):
-        
+        if primo==1:
+            print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'blue'))
+            print("Indirizzo PayPal",paypal)
+        primo=1
         print("1) Genera portieri")
         print("2) Genera difensori")
         print("3) Genera centrocampisti")
         print("4) Genera attaccanti")
-        print("Scrivere il numero del reparto [1,2,3,4] e premere Invio.")
+        print("5) Donami un euro per un caffè.")
+        print("Scrivere il numero del reparto [1,2,3,4,5] e premere Invio.")
         with open("./src/crediti.txt", "r") as fin:
             linee=fin.readlines()
         crediti_rimasti=linee[1].split("=")[1].split("\n")[0]
-        scelta=input()
-        if scelta!="1" and scelta!="2" and scelta!="3" and scelta!="4":
+        scelta=input().strip()
+        if scelta!="1" and scelta!="2" and scelta!="3" and scelta!="4" and scelta!="5":
             print("Inserire una scelta valida.")
             input("Premere invio per continuare")
             os.system('CLS')
@@ -2824,6 +2888,12 @@ def main():
             salvaTutto()
             os.system('CLS')
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+        elif scelta=="5":
+            print("Ti ringrazio! Verrai reindirizzato fra qualche secondo al sito di paypal.")
+            time.sleep(3)
+            webbrowser.open(paypal)
+            os.system('CLS')
+            continue
 if __name__ == "__main__":
     main()
 
