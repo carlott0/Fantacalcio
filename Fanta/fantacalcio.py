@@ -539,6 +539,7 @@ def calcola_quotazioni():
         new=pd.DataFrame()
         new['Id']=data['Id']
         new['R']=data['R']
+        new['RM']=data['RM']
         new['Nome']=data['Nome']
         new['Squadra']=data['Squadra']
         new['Qt. A']=data['Qt.A']
@@ -687,7 +688,7 @@ def genera_portieri(scelta):
     diz={}
     classifica=list(pd.read_excel("./excel/classifica.xlsx")['SQUADRE'])
     #d_giocatori=pd.read_excel("./excel/giocatori.xlsx")
-    d_giocatori=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    d_giocatori=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     d_giocatori['Nome'] = d_giocatori['Nome'].apply(lambda nome : nome.upper())
     
     d_calendario=pd.read_excel("./excel/calendario.xlsx")
@@ -725,12 +726,27 @@ def genera_portieri(scelta):
     return
 def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     tit_risultato=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=8-len(acquistati)   
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='D')]       
+    with open("./indice/titolari.txt","r") as r:
+        l=r.readlines()
+    r.close()
+
+
+    gs={}
+    quotazioni=quotazioni.loc[(quotazioni['R']=='D')]
+    for el in l:
+        tit=el.split(":")[1].replace("%","")
+        g=el.split(":")[0].strip()
+        if int(tit.strip())>80 and g.upper().strip() in list(quotazioni['Nome']):
+            #print(g)
+            p=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['VAL'].values[0])
+            gs[g]=p
+    gs=list(dict(sorted(gs.items(), key = lambda x: x[1])).keys())
     
     try:
         p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['VAL'].values[0])
@@ -800,7 +816,10 @@ def dif(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     i=0
     tentativi=0
     while(len(acquistati)!=8):
-        d=random.choice(ds)
+        try:
+            d=gs[i]
+        except:
+            d=random.choice(ds)
         i+=1
         if i==200:
             ds=list(quotazioni.loc[(quotazioni['R'] == 'D') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
@@ -990,7 +1009,7 @@ def difensori(u,budget):
     valore_reparto=0
 
     
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
@@ -1165,18 +1184,21 @@ def difensori(u,budget):
                 s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
             except:
                 s=""
-                
+            try:
+                rm=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['RM'].values[0]
+            except:
+                rm=""                
             if el.upper() == giocatore.upper():
                 tx=int(tit)#round(round(int(tit)/38,2)*100,2)
                 px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
+            lista_print.append([el,s,rm,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","",""])
+        lista_print.append(["","","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","","",""])
         prezzo=int(prezzo)    
-        lista_print.append(["Indice titolarietà medio squadra:",str(int(xxx)/len(acquistati))+"%","","","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria","Infortunato","Squalificato"]))
+        lista_print.append(["Indice titolarietà medio squadra:",str(int(xxx)/len(acquistati))+"%","","","","","",""])
+        print(tabulate(lista_print, headers=["Nome", "Squadra","RM", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà", "Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
 
         # valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
@@ -1231,13 +1253,27 @@ def difensori(u,budget):
     return reparto_finale
 def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
     tit_risultato=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=8-len(acquistati)
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     t=x.loc[(x['R']=='C')]
+    with open("./indice/titolari.txt","r") as r:
+        l=r.readlines()
+    r.close()
 
+
+    gs={}
+    quotazioni=quotazioni.loc[(quotazioni['R']=='C')]
+    for el in l:
+        tit=el.split(":")[1].replace("%","")
+        g=el.split(":")[0].strip()
+        if int(tit.strip())>80 and g.upper().strip() in list(quotazioni['Nome']):
+            #print(g)
+            p=int(quotazioni[quotazioni['Nome'].str.contains(g.upper())]['VAL'].values[0])
+            gs[g]=p
+    gs=list(dict(sorted(gs.items(), key = lambda x: x[1])).keys())
     try:
         p=int(quotazioni[quotazioni['Nome'].str.contains(giocatore_chiamato.upper())]['VAL'].values[0])
     except:
@@ -1310,7 +1346,10 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
     i=0
     tentativi=0
     while(len(acquistati)!=8):
-        cx=random.choice(cs)
+        try:
+            cx=gs[i]
+        except:
+            cx=random.choice(cs)
         i+=1
         if i==200:
             cs=list(quotazioni.loc[(quotazioni['R'] == 'C') & (quotazioni['Qt. A'] < 5)]['Nome'].values)
@@ -1349,7 +1388,7 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                     k+=1
                     acquistati.append(cx)
                     giachiamati.append(cx)
-            return 0,p,prezzo_ritorno,tit_risultato
+            return 0,p,tit_risultato
         ############
         if cx.upper() in acquistati or cx.upper() in giachiamati:
             
@@ -1493,8 +1532,8 @@ def centr(giocatore_chiamato,acquistati,budget_rimasto,giachiamati):
                         k+=1
                         acquistati.append(cx)
                         giachiamati.append(cx)
-                return 0,p,prezzo_ritorno,tit_risultato
-    return 0,p,prezzo_ritorno,tit_risultato
+                return 0,p,tit_risultato
+    return 0,p,tit_risultato
     
 def centrocampisti(u,budget):
     i=1
@@ -1505,7 +1544,7 @@ def centrocampisti(u,budget):
     #valori=[]
     valore_reparto=0
     giachiamati=[]
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     x=pd.read_excel("./excel/giocatori.xlsx")
     x['Nome'] = x['Nome'].apply(lambda nome : nome.upper())
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
@@ -1672,20 +1711,24 @@ def centrocampisti(u,budget):
             try:    
                 s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
             except:
-                s=""                
+                s=""   
+            try:
+                rm=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['RM'].values[0]
+            except:
+                rm=""                
             if el.upper() == giocatore.upper():
                     tx=int(tit)
                     px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
+            lista_print.append([el,s,rm,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
             #print(el,"\t\t",p,"\t\t",gf,"\t\t",round(round(int(tit)/38,2)*100,2),"%")
-        lista_print.append(["","","","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","",""])
+        lista_print.append(["","","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","","",""])
         prezzo=int(prezzo)    
  
         
-        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","","",""])
-        print(tabulate(lista_print, headers=["Nome","Squadra", "Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
+        lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx)/len(acquistati))+"%","","","","","",""])
+        print(tabulate(lista_print, headers=["Nome","Squadra", "RM","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
         #valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
         # print("",valore_temp)
@@ -1740,7 +1783,7 @@ def centrocampisti(u,budget):
     return reparto_finale
 def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
     tit_risultato=[]    
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     da_comprare=6-len(acquistati)
     x=pd.read_excel("./excel/giocatori.xlsx")
@@ -1848,7 +1891,6 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                 if ax not in acquistati and ax not in giachiamati:
                     
                     prezzo=1
-                    budget_rimasto=new_budg-1
                     try:
                         with open("./indice/titolari.txt","r") as r:
                             l=r.readlines()
@@ -1990,7 +2032,6 @@ def att(giocatore_chiamato,acquistati,budget_rimasto, giachiamati):
                     if ax not in acquistati and ax not in giachiamati:
                         
                         prezzo=1
-                        budget_rimasto=new_budg-1
                         try:
                             with open("./indice/titolari.txt","r") as r:
                                 l=r.readlines()
@@ -2030,7 +2071,7 @@ def attaccanti(u,budget):
     #valori=[]
     giachiamati=[]
     valore_reparto=0
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     
     
@@ -2196,19 +2237,23 @@ def attaccanti(u,budget):
                 s=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['Squadra'].values[0]
             except:
                 s=""
+            try:
+                rm=quotazioni[quotazioni['Nome'].str.contains(el.upper())]['RM'].values[0]
+            except:
+                rm=""                
             if el.upper() == giocatore.upper():
                 tx=int(tit)
                 px=prezzo_probabile
-            lista_print.append([el,s,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
-        lista_print.append(["","","","","","","",""])
-        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","","",""])
-        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","","",""])
+            lista_print.append([el,s,rm,p,int(prezzo_probabile),gf,str(tit).strip()+"%",cat,inf,squ])
+        lista_print.append(["","","","","","","","",""])
+        lista_print.append(["Prezzo Totale Previsto:",int(ptpr),"","","","","","","",""])
+        lista_print.append(["Prezzo Totale Probabile:",int(prt),"","","","","","","",""])
         prezzo=int(prezzo)    
         tit=0
         for el in tit_risultato:
             tit+=round(round(int(el)/38,2)*100,2)
         lista_print.append(["Indice titolarietà medio reparto:",str(int(xxx/len(acquistati)))+"%","","","","",""])
-        print(tabulate(lista_print, headers=["Nome", "Squadra","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
+        print(tabulate(lista_print, headers=["Nome", "Squadra","RM","Prezzo Previsto","Prezzo Probabile", "Gol Scorso Anno","Titolarietà","Categoria","Infortunato","Squalificato"]))
         lista_print.clear()
         # valore_temp=(valore_reparto+prezzo)/(len(reparto_finale.keys())+1)
         # if int((valore_temp-valore_prima)*100) >150:
@@ -2320,9 +2365,9 @@ def d(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Hai speso troppo, verranno scalati crediti sui centrocampisti.")
         print("Crediti spesi in più:",abs(budg_dif-spesa))
         print("Centr:",budg_centr-abs(budg_dif-spesa))
-        print("Att:",budg_att+(budg_dif-spesa))
+        print("Att:",budg_att)
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr,budg_att+(budg_dif-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,0,budg_centr+(budg_dif-spesa),budg_att)
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_dif-spesa))
         print("Cent:",budg_centr)
@@ -2343,7 +2388,7 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
     #print("###############")
     spesa=0
     j=1
-    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','Nome','Squadra','Qt. A','Qt. I','VAL'])
+    quotazioni=pd.read_excel("./excel/Quotazioni_Fantacalcio.xlsx", names=['Id','R','RM','Nome','Squadra','Qt. A','Qt. I','VAL'])
     quotazioni['Nome'] = quotazioni['Nome'].apply(lambda nome : nome.upper())
     portieri_presi={}
     quotazioni=quotazioni.loc[(quotazioni['R']=='P')]
@@ -2435,7 +2480,6 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         buff=""+p.upper()+" : "+prezzi
         w_p.write(buff)
         w_p.write("\n")
-        spesa+=int(prezzi)
         j+=1
         portieri_presi[p]=prezzi
     print("Reparto Finale:")
@@ -2448,9 +2492,9 @@ def p(budget_tot,budg_portieri, budg_dif,budg_centr,budg_att):
         print("Crediti spesi in più:",abs(budg_portieri-spesa))
         print("Dif:",budg_dif-abs(budg_portieri-spesa))
         print("Cent:",budg_centr)
-        print("Att:",budg_att+(budg_portieri-spesa))
+        print("Att:",budg_att)
         print("CREDITI RIMASTI TOTALE:",(budget_tot-spesa))
-        salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif,budg_centr,budg_att+(budg_portieri-spesa))
+        salvasuFile(budget_tot,budget_tot-spesa,0,budg_dif+(budg_portieri-spesa),budg_centr,budg_att)
     else:
         print("Crediti rimasti (verranno aggiunti agli attaccanti):",(budg_portieri-spesa))
         print("Dif:",budg_dif)
@@ -2587,6 +2631,7 @@ def main():
     os.system('color')
     #f = Figlet(font='slant')
     #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
+    print("Istruzioni all'interno della cartella Fanta\ReadMe.md")
     print(colored("Benvenuto! Questo programma ti sarà da guida per l'asta del fantacalcio! ",'cyan'))
     print(colored("Istruzioni all'interno della cartella Fanta\ReadMe exe.md",'cyan'))
     print(colored("Se ti piace il programma e vorresti altre funzionalità supportami donandomi qualcosa! Te ne sarei grato. ",'cyan'))
@@ -2907,11 +2952,8 @@ def main():
             #print(colored(f.renderText('Fantacalcio di Carlotto'),'yellow'))
         elif scelta=="5":
             print("Ti ringrazio! Verrai reindirizzato fra qualche secondo al sito di paypal.")
-            try:
-                time.sleep(3)
-                webbrowser.open(paypal)
-            except:
-                pass
+            time.sleep(3)
+            webbrowser.open(paypal)
             os.system('CLS')
             continue
 #if __name__ == "__main__":
