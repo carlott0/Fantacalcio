@@ -26,7 +26,7 @@ six==1.16.0
 soupsieve==2.3.2.post1
 tabulate==0.8.10
 termcolor==1.1.0
-tqdm==4.64.0
+tqdm==4.66.3
 urllib3==1.26.11
 w3lib==1.22.0
 websockets==10.3
